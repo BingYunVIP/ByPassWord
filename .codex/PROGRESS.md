@@ -60,3 +60,5 @@
 用户明确要求删除ByUI、本地部署、上传BingYunVIP/ByPassWord，授权本次Commit与普通Push，覆盖先前不提交限制。ByUI依赖残留已删；Third清空来源未知默认凭据但保留参考页面。正式运行代码与已验证版本无差异，服务active/enabled且健康。上传前独立复核参考JS、6张脱敏截图、管理归档、ignore与当前运行文件均通过，报告见[上传复核](Test/2026-11-07-GitHub上传独立复核.md)。
 
 当前进入本地提交与SSH普通推送；首次GitHub main使用当前干净快照，旧开发提交仅保留于本地codex/local-history-20261107。远端结果待完成后核验记录。
+
+GitHub源码首发已成功：main提交0c47af4，211个当前文件；旧开发历史仅保留本地codex/local-history-20261107。origin/main已跟踪。本机service active/enabled、健康200，ByUI不存在；无运行数据/密钥上传。收尾文档另以普通文档提交保存后核验远端一致；[发布验证](Test/2026-11-07-GitHub发布验证.md)。

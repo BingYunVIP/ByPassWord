@@ -1,0 +1,486 @@
+{
+  "audit_id": "BPW-SEC-20261107",
+  "date": "2026-11-07",
+  "timezone": "Asia/Singapore",
+  "git_head": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d",
+  "baseline_verification": {
+    "prior_files": 191,
+    "present_unchanged": 115,
+    "changed_existing_source_files": [],
+    "no_longer_present": [
+      "ByUI/src/App.vue",
+      "ByUI/src/api/client.js",
+      "ByUI/src/components/admin/AssetPicker.vue",
+      "ByUI/src/components/admin/RichPreview.vue",
+      "ByUI/src/components/admin/TagInput.vue",
+      "ByUI/src/components/admin/modals/CardFormModal.vue",
+      "ByUI/src/components/admin/modals/CategoryFormModal.vue",
+      "ByUI/src/components/admin/modals/CouponFormModal.vue",
+      "ByUI/src/components/admin/modals/FileUploadModal.vue",
+      "ByUI/src/components/admin/modals/ImagePreviewModal.vue",
+      "ByUI/src/components/admin/modals/OrderFormModal.vue",
+      "ByUI/src/components/admin/modals/PaymentFormModal.vue",
+      "ByUI/src/components/admin/modals/ProductWizard.vue",
+      "ByUI/src/components/buyer/AnnouncementCard.vue",
+      "ByUI/src/components/buyer/CategoryPills.vue",
+      "ByUI/src/components/buyer/OrderResultCard.vue",
+      "ByUI/src/components/buyer/PayEmbedModal.vue",
+      "ByUI/src/components/buyer/ProductCard.vue",
+      "ByUI/src/components/buyer/SiteHeader.vue",
+      "ByUI/src/components/ui/IpTag.vue",
+      "ByUI/src/components/ui/PaginationBar.vue",
+      "ByUI/src/composables/useAdminModal.js",
+      "ByUI/src/composables/useInventoryRefresh.js",
+      "ByUI/src/composables/useResponsiveMetrics.js",
+      "ByUI/src/data/adminModules.js",
+      "ByUI/src/data/assetFiles.js",
+      "ByUI/src/data/enumLabels.js",
+      "ByUI/src/data/icons.js",
+      "ByUI/src/i18n/dict.js",
+      "ByUI/src/i18n/index.js",
+      "ByUI/src/main.js",
+      "ByUI/src/router/index.js",
+      "ByUI/src/stores/auth.js",
+      "ByUI/src/stores/db.js",
+      "ByUI/src/stores/geo.js",
+      "ByUI/src/stores/ui.js",
+      "ByUI/src/styles/base.css",
+      "ByUI/src/styles/components.css",
+      "ByUI/src/styles/tailwind.css",
+      "ByUI/src/styles/tokens.css",
+      "ByUI/src/utils/chartAxis.js",
+      "ByUI/src/utils/coupon.js",
+      "ByUI/src/utils/format.js",
+      "ByUI/src/utils/hash.js",
+      "ByUI/src/utils/i18nText.js",
+      "ByUI/src/utils/ipprobe.js",
+      "ByUI/src/utils/markdown.js",
+      "ByUI/src/utils/queryPassword.js",
+      "ByUI/src/utils/sanitize.js",
+      "ByUI/src/utils/saveProductWithPools.js",
+      "ByUI/src/utils/saveProductWithPools.test.js",
+      "ByUI/src/utils/sortOrder.js",
+      "ByUI/src/utils/sortOrder.test.js",
+      "ByUI/src/utils/stock.js",
+      "ByUI/src/utils/thumb.js",
+      "ByUI/src/utils/upload.js",
+      "ByUI/src/views/NotFoundView.vue",
+      "ByUI/src/views/admin/AdminLoginView.vue",
+      "ByUI/src/views/admin/AdminSetupView.vue",
+      "ByUI/src/views/admin/AdminShell.vue",
+      "ByUI/src/views/admin/CardsView.vue",
+      "ByUI/src/views/admin/CategoriesView.vue",
+      "ByUI/src/views/admin/CouponsView.vue",
+      "ByUI/src/views/admin/DashboardView.vue",
+      "ByUI/src/views/admin/EmailSettingsView.vue",
+      "ByUI/src/views/admin/FilesView.vue",
+      "ByUI/src/views/admin/LogsView.vue",
+      "ByUI/src/views/admin/OrdersView.vue",
+      "ByUI/src/views/admin/PaymentSettingsView.vue",
+      "ByUI/src/views/admin/ProductsView.vue",
+      "ByUI/src/views/admin/SecuritySettingsView.vue",
+      "ByUI/src/views/admin/SiteSettingsView.vue",
+      "ByUI/src/views/buyer/HomeView.vue",
+      "ByUI/src/views/buyer/OrderQueryView.vue",
+      "ByUI/src/views/buyer/PayResultView.vue",
+      "ByUI/src/views/buyer/ProductDetailView.vue"
+    ],
+    "missing_explanation": "ByUI historical demo directory absent at start of continuation; not deleted/restored by this continuation"
+  },
+  "execution": [
+    {
+      "mode": "pytest",
+      "start": "2026-11-07T02:28:47.262931+00:00",
+      "end": "2026-11-07T02:28:54.009459+00:00",
+      "exit_code": 0,
+      "limits": {
+        "cpu_s": 100,
+        "wall_s": 120,
+        "as_bytes": 1610612736,
+        "nproc": 64,
+        "file_bytes": 33554432,
+        "tmpfs_bytes": 402653184
+      }
+    },
+    {
+      "mode": "node-tests",
+      "start": "2026-11-07T02:29:25.820396+00:00",
+      "end": "2026-11-07T02:29:27.485367+00:00",
+      "exit_code": 0,
+      "limits": {
+        "cpu_s": 100,
+        "wall_s": 120,
+        "as_bytes": 68719476736,
+        "nproc": 64,
+        "file_bytes": 33554432,
+        "tmpfs_bytes": 402653184
+      }
+    },
+    {
+      "mode": "security",
+      "start": "2026-11-07T02:22:17.494732+00:00",
+      "end": "2026-11-07T02:22:20.187706+00:00",
+      "exit_code": 0,
+      "limits": {
+        "cpu_s": 100,
+        "wall_s": 120,
+        "as_bytes": 1610612736,
+        "nproc": 64,
+        "file_bytes": 33554432,
+        "tmpfs_bytes": 402653184
+      }
+    },
+    {
+      "mode": "supplemental",
+      "start": "2026-11-07T02:31:52.663682+00:00",
+      "end": "2026-11-07T02:31:54.047280+00:00",
+      "exit_code": 0,
+      "limits": {
+        "cpu_s": 100,
+        "wall_s": 120,
+        "as_bytes": 1610612736,
+        "nproc": 64,
+        "file_bytes": 33554432,
+        "tmpfs_bytes": 402653184
+      }
+    },
+    {
+      "mode": "node-store",
+      "start": "2026-11-07T02:40:06.901820+00:00",
+      "end": "2026-11-07T02:40:07.125994+00:00",
+      "exit_code": 0,
+      "limits": {
+        "cpu_s": 100,
+        "wall_s": 120,
+        "as_bytes": 68719476736,
+        "nproc": 64,
+        "file_bytes": 33554432,
+        "tmpfs_bytes": 402653184
+      }
+    }
+  ],
+  "results": [
+    {
+      "source": "security.log",
+      "id": "T01",
+      "anonymous": {
+        "/api/vault": 401,
+        "/api/settings": 401,
+        "/api/settings/mail": 401,
+        "/api/audit": 401,
+        "/api/backup/list": 401,
+        "/api/auth/me": 401
+      }
+    },
+    {
+      "source": "security.log",
+      "id": "T02",
+      "first_register": 201,
+      "second_register": 201
+    },
+    {
+      "source": "security.log",
+      "id": "T03",
+      "bob_items": 0,
+      "bob_folders": 0,
+      "cross_user": {
+        "PATCH /api/items/audit-alice-item": 404,
+        "DELETE /api/items/audit-alice-item": 404,
+        "PATCH /api/folders/audit-alice-folder": 404,
+        "DELETE /api/folders/audit-alice-folder": 404
+      }
+    },
+    {
+      "source": "security.log",
+      "id": "T04",
+      "known_stable": true,
+      "unknown_stable": false
+    },
+    {
+      "source": "security.log",
+      "id": "T05",
+      "email_code_verified": 200,
+      "reset_without_recovery": 200,
+      "new_auth_login": 200,
+      "original_wrapped_dek_replaced": true,
+      "used_recovery_code": false,
+      "historical_plaintext_decrypted": false
+    },
+    {
+      "source": "security.log",
+      "id": "T06",
+      "reset_token_replay": 200,
+      "old_access_after_reset": 200,
+      "old_refresh_after_reset": 401
+    },
+    {
+      "source": "security.log",
+      "id": "T07",
+      "first_totp": 200,
+      "same_challenge_same_totp_replay": 200,
+      "distinct_access_tokens": true
+    },
+    {
+      "source": "security.log",
+      "id": "T08",
+      "invalid_attempts": [
+        401,
+        401,
+        401,
+        401,
+        401,
+        401
+      ],
+      "correct_after_six_failures": 200,
+      "route_limit_disabled": true
+    },
+    {
+      "source": "security.log",
+      "id": "T09",
+      "repeated_enable_without_password": 200,
+      "regenerate_wrong_password": 401,
+      "old_backup_code": 401,
+      "new_backup_code": 200,
+      "reused_backup_code": 401
+    },
+    {
+      "source": "security.log",
+      "id": "T10",
+      "concurrent_recovery_status": [
+        200,
+        200
+      ]
+    },
+    {
+      "source": "security.log",
+      "id": "T11",
+      "concurrent_refresh_status": [
+        200,
+        200
+      ]
+    },
+    {
+      "source": "security.log",
+      "id": "T12",
+      "forged_header_in_audit": true,
+      "proxy_headers_on_server": false
+    },
+    {
+      "source": "security.log",
+      "id": "T13",
+      "snapshot_created_by_other_user": 200,
+      "snapshot_contains_all_users": true,
+      "contains_auth_and_totp_columns": true,
+      "mode": "0o600",
+      "umask": "077 audit environment",
+      "snapshot_download_endpoint": false
+    },
+    {
+      "source": "security.log",
+      "id": "T14",
+      "production_accepts_default_keys": true,
+      "forged_access_with_synthetic_known_uid": 200,
+      "current_deployment_default_keys_verified": false
+    },
+    {
+      "source": "security.log",
+      "id": "T15",
+      "wrong_type": 401,
+      "expired": 401
+    },
+    {
+      "source": "security.log",
+      "id": "T16",
+      "login_limit_real_http": [
+        401,
+        401,
+        401,
+        401,
+        401,
+        429
+      ],
+      "rate_limit_enabled": true,
+      "peer": "127.0.0.1"
+    },
+    {
+      "source": "security.log",
+      "id": "T17",
+      "api_cache_control": null,
+      "cors_untrusted_origin": 400
+    },
+    {
+      "source": "security.log",
+      "id": "CLEANUP",
+      "server_stopped": true,
+      "temporary_database_only": true,
+      "real_email_sent": false
+    },
+    {
+      "source": "supplemental.log",
+      "id": "T18",
+      "public_registration": 201,
+      "mail_config_update": 200,
+      "password_supplied": false,
+      "mail_test": 200,
+      "global_synthetic_password_received": true,
+      "recipient_is_local_sink": true,
+      "real_credentials_used": false,
+      "rate_limit_enabled": true
+    },
+    {
+      "source": "supplemental.log",
+      "id": "T19",
+      "snapshot_mode_under_umask022": "0o644",
+      "stale_pre_import_survives": true,
+      "cleanup_removed": 0
+    },
+    {
+      "source": "supplemental.log",
+      "id": "T20",
+      "synthetic_snapshot_integrity": "ok",
+      "user_rows": 1
+    },
+    {
+      "source": "supplemental.log",
+      "id": "T21",
+      "header_newline_rejected_by_email_library": true,
+      "no_message_sent": true,
+      "template_route_probe": 405
+    },
+    {
+      "source": "supplemental.log",
+      "id": "CLEANUP_EXTRA",
+      "http_stopped": true,
+      "smtp_stopped": true,
+      "temporary_data_only": true
+    },
+    {
+      "source": "node-store-v2.log",
+      "id": "T22",
+      "locked": true,
+      "main_dek_cleared": true,
+      "item_list_cleared": true,
+      "editing_form_password_retained": true,
+      "editor_still_selected": true,
+      "execution": "Node real store modules; no browser DOM test"
+    }
+  ],
+  "dependency_check": {
+    "provider": "OSV querybatch",
+    "query_count": 264,
+    "http_status": 200,
+    "hit_count": 0,
+    "pagination_count": 0,
+    "excluded": [
+      {
+        "area": "ByUI",
+        "reason": "currently absent; historical inventory excluded"
+      }
+    ],
+    "limitations": "Only public identity/version matching; no installed-file authenticity or malware analysis"
+  },
+  "dependency_versions": {
+    "frontend": {
+      "dompurify": "3.4.17",
+      "hash-wasm": "4.12.0",
+      "marked": "15.0.12",
+      "vite": "6.4.5",
+      "vitest": "5.0.5",
+      "vue": "3.5.44",
+      "vue-router": "4.6.4"
+    },
+    "backend": {
+      "pytest-asyncio": "1.4.1",
+      "pydantic": "2.14.2",
+      "websockets": "17.4",
+      "pydantic-settings": "2.16.2",
+      "Pygments": "2.21.0",
+      "starlette": "1.10.0",
+      "wrapt": "2.5.2",
+      "annotated-doc": "0.0.5",
+      "argon2-cffi": "25.1.0",
+      "SQLAlchemy": "2.1.6",
+      "aiosqlite": "0.22.1",
+      "watchfiles": "1.3.0",
+      "MarkupSafe": "3.0.4",
+      "typing_extensions": "4.16.0",
+      "pydantic_core": "2.50.2",
+      "fastapi": "0.162.0",
+      "cryptography": "50.0.2",
+      "uvloop": "0.23.0",
+      "bypw-backend": "0.1.0",
+      "python-dotenv": "1.2.4",
+      "httpcore": "1.0.9",
+      "argon2-cffi-bindings": "26.1.0",
+      "pycparser": "3.12",
+      "limits": "5.8.0",
+      "slowapi": "0.1.10",
+      "pytest": "9.2.0",
+      "typing-inspection": "0.4.4",
+      "dnspython": "2.9.1",
+      "PyOTP": "2.10.0",
+      "uvicorn": "0.54.0",
+      "certifi": "2026.10.23",
+      "greenlet": "3.5.6",
+      "idna": "3.20",
+      "iniconfig": "2.3.1",
+      "Deprecated": "3.0.1",
+      "click": "8.5.0",
+      "PyYAML": "6.0.3",
+      "cffi": "2.1.1",
+      "httpx": "0.28.1",
+      "opentelemetry-api": "1.45.2",
+      "aiosmtplib": "5.1.3",
+      "anyio": "4.16.0",
+      "annotated-types": "0.8.0",
+      "email-validator": "2.3.0",
+      "pip": "26.2.2",
+      "packaging": "26.3",
+      "alembic": "1.20.1",
+      "pluggy": "1.7.0",
+      "PyJWT": "2.15.1",
+      "h11": "0.16.0",
+      "httptools": "0.9.0",
+      "Mako": "1.4.3"
+    }
+  },
+  "evidence_sha256": {
+    "baseline-files.json": "c0cddb6ee60c2854f1fd4035479c7e16696d50a0494ca35cfbe9eb5cc5042b52",
+    "dependency-inventory.json": "e6ea5c3f19847e457f2e50fd02d73defafa2ec75d3ce3f17e09873590e1facb7",
+    "security.log": "2016dc34d2aae604dddcba1575180bba4ab3e8006adbb7120ced92251bf380ca",
+    "security-execution.json": "3e4889282bbd5700d3cd7d150e19ff4b022908e9f729e573d37a68b051f67220",
+    "supplemental.log": "ab7ab8f111edb42fd2ea24c19b344b674864b094e6cbf391c7940d3eee95d7c6",
+    "supplemental-execution.json": "9ce1fd9ea366fd4a30a27e1948a16f3edecde2533a7bd980492dfedf570e9ece",
+    "node-store-v2.log": "184d975aae87b8955bea48e26dc9eea99fc804ce9f5facdc35e7d238ffab1c2a",
+    "node-store-v2-execution.json": "59e1919c2547529801eebd8e3bf4f6afcd57fe9476fdec23808668044eb47d6c",
+    "pytest-v2.log": "3f265246266bbd6d4f500db112b95a87f312947ebdfbbda423a5d0a06a3a4d0f",
+    "pytest-v2-execution.json": "c7d8ec5731ace9417c72fb575b7d6ab0dbf78d0da5d8003aedef1137daf16a54",
+    "node-tests-v3.log": "bb47e22a8c117f6c3189ea43d7766277e3adabecdee88834d7dfe35e1071c9d2",
+    "node-tests-v3-execution.json": "5fe543402a9e57ba37cbd8d16a52a1d66e7dcb41819bc626017483f27527c1fd",
+    "osv-querybatch.json": "4b229dc163b099f998ec91c9da6a79cec7d595963b826c9e7efb01ef080679f5",
+    "static-scan.json": "8135d412c16483ab9559348885469f6a68bbeefd51e8a45b4f2f307236e865ff",
+    "auth-independent-review.md": "7063651b76aa23a070b235f04b3109f775340ef8b2925958f4e0eed68228968d",
+    "continuation-independent-review.md": "97219132ff3d6a8f5d8b80d76d88e46862c821331a37d1b5d0bfd77106dac610",
+    "stage/security_harness.py": "eced447f8fa559a0ee51a1dd1514d940ab3768234f7725823d543536d1f00d7c",
+    "stage/supplemental_harness.py": "622e9f6973e2160b2d49c966e37a2fb19ff4a2cc294fef917c935637ed0fed6a",
+    "stage/frontend_harness.mjs": "a92b5c3bfcd5ad9664b0d2876ac77d731602ae09ecdbce114a2748bf1184e0db",
+    "stage/extension-loader.mjs": "5e71ea3c32d7169dd31465220c07bd10731a4b3dd6dc267e1902e6cccd85e980",
+    "run_sandbox_v2.py": "c2d2a94f930570ec37e4cc07ee8632b3b9638cbdb4931b0aea03199370fe84b5",
+    "run_sandbox_v3.py": "ef13da88617dbf7975e4b11da843fa6a9dc047d54da39394334c738c93369bba",
+    "run_sandbox_extra.py": "377964557ab981c64955ec1ba70fcc19726a8ed886920b3a7be60a678bad8cbb",
+    "run_sandbox_store.py": "ca5227846421ea06c3d24a9da8f1042461323582ceca9f41a55ebc91240427dc",
+    "stage/bootstrap_v2.py": "3d9a4939e3bdd1cae337ecb27de12f057a83c19276346554fe710c80c331f275",
+    "stage/bootstrap_v3.py": "fc6bbc6938ba07a753dd3fdeed44356be91b12b20a97b6d3ad282059ad246884",
+    "stage/bootstrap_extra.py": "eacd98a851620d2cabae37b4861348aceb12b04e04b27fea21ee2a6768234273"
+  },
+  "raw_directory": "/tmp/bypw-audit-20261107",
+  "raw_retention": "Temporary directory, may be removed by system; compact sanitized results and hashes retained here",
+  "authorization": "Audit and synthetic isolated validation only; no business edits/deploy/Git writes/production/real credential use",
+  "exclusions": [
+    "no live database contents read",
+    "no real environment secret values read",
+    "no remote private source upload",
+    "no real email",
+    "no production traffic"
+  ]
+}

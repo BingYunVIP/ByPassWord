@@ -1,0 +1,107 @@
+@import './tokens.css';
+@import './components.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================= 全局强制使用 Maple Mono 字体 ================= */
+*,
+body,
+input,
+button,
+select,
+textarea,
+code,
+pre {
+  font-family: 'Maple Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 图标已改为 Heroicons 内联 SVG（components/common/AppIcon.vue），
+   不再需要 Material Symbols 字体与字号豁免规则 */
+
+body {
+  user-select: none;
+  overflow: hidden;
+}
+
+/* 页面底色由 App.vue 的 bg-[var(--bg-page)] 提供（ByUI 纯色 #F5F5F7）；
+   旧的 .macos-bg-light 渐变壁纸已移除 */
+
+/* Markdown 渲染样式 */
+.markdown-body {
+  font-size: 0.78rem;
+  line-height: 1.65;
+  word-break: break-word;
+  user-select: text;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+  color: var(--accent);
+}
+.markdown-body p {
+  margin-bottom: 0.45rem;
+}
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.45rem;
+  list-style: disc;
+}
+.markdown-body code {
+  padding: 0.12rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgba(var(--accent-rgb) / 0.12);
+  color: var(--accent);
+  font-weight: 600;
+}
+.markdown-body pre {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 17, 23, 0.92);
+  color: #10B981;
+  overflow-x: auto;
+  margin: 0.45rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.markdown-body pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.45rem 0;
+}
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid rgba(156, 163, 175, 0.25);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 0.35rem;
+  height: 0.35rem;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.38);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.65);
+}
+
+.spring-btn {
+  transition: all 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+}

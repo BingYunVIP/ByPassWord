@@ -1,0 +1,872 @@
+{
+  "date": "2026-11-07",
+  "role": "independent QA",
+  "baseline": "77eaf0f",
+  "original_backend_suite": {
+    "passed": 70,
+    "warnings": 16,
+    "pytest_seconds": 21.76,
+    "exit_code": 0
+  },
+  "browser": {
+    "events": [
+      {
+        "check": "OS isolation",
+        "result": "passed",
+        "uid": 65534,
+        "external_network": false,
+        "host_root_visible": false
+      },
+      {
+        "check": "Real service startup with SQLite/Alembic",
+        "result": "passed"
+      },
+      {
+        "check": "Browser register and save recovery code",
+        "result": "passed"
+      },
+      {
+        "check": "Personal instance disables additional registration",
+        "result": "passed"
+      },
+      {
+        "check": "Browser creates encrypted item and TOTP matches independent pyotp",
+        "result": "passed"
+      },
+      {
+        "check": "Real database does not contain test main/item plaintext or item TOTP secret",
+        "result": "passed"
+      },
+      {
+        "check": "Lock clears editor DOM and browser permitted clipboard",
+        "result": "passed",
+        "trigger": "existing lock button DOM click while editor overlay open"
+      },
+      {
+        "check": "Lock clears unsaved SMTP DOM",
+        "result": "passed"
+      },
+      {
+        "check": "Browser encrypted export; wrong password rejected; valid duplicate import",
+        "result": "passed"
+      },
+      {
+        "check": "Browser enables account 2FA and receives 10 one-use codes",
+        "result": "passed"
+      },
+      {
+        "check": "Real logout immediately rejects previous access token",
+        "result": "passed"
+      },
+      {
+        "check": "Browser login requires and accepts fresh real-time TOTP",
+        "result": "passed"
+      },
+      {
+        "check": "Browser lock/unlock requires password and fresh TOTP",
+        "result": "passed"
+      },
+      {
+        "check": "Browser backup-code login",
+        "result": "passed"
+      },
+      {
+        "check": "Browser rejects consumed backup code",
+        "result": "passed"
+      },
+      {
+        "check": "Browser email+recovery reset with real SMTP; wrong recovery rejected; prior item decrypts after reset",
+        "result": "passed"
+      },
+      {
+        "check": "No browser uncaught errors",
+        "result": "passed"
+      },
+      {
+        "check": "Browser core acceptance completed",
+        "result": "passed"
+      }
+    ],
+    "requests": [
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/register",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/audit?limit=100",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/items",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail/events",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail/templates",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/backup/list",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/backup",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault/import",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/setup",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/enable",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/prelogin",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/audit?limit=100",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/unlock/verify-totp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/prelogin",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/verify-recovery",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/audit?limit=100",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/prelogin",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/verify-recovery",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/forgot",
+        "method": "POST",
+        "status": 202
+      },
+      {
+        "path": "/api/auth/forgot/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/reset",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/prelogin",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/2fa/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/audit?limit=100",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      }
+    ],
+    "browser_errors": [],
+    "smtp_messages": 4
+  },
+  "local_lifespan_rate_limit": {
+    "passed": 1,
+    "exit_code": 0,
+    "statuses": [
+      401,
+      401,
+      401,
+      401,
+      401,
+      429
+    ]
+  },
+  "F16_before_fix": {
+    "same_rev_patch": [
+      200,
+      200
+    ],
+    "concurrent_new_items": "one500_vault_state_unique_constraint",
+    "status": "blocking_pending_developer"
+  },
+  "artifact": "/tmp/bypw-frontend-repair-tests/artifacts-final/dist",
+  "frontend_manifest_match": {
+    "entries": 77,
+    "mismatches": 0
+  },
+  "evidence_files": {
+    "final-cross-worker-execution.json": "264706efba1fce47394b87f8a4d249dee4d6c1701dfca23b810e82c8f968b486",
+    "final-cross-worker.log": "a6a55df081bd87bbaa1c679830016b636f9f260fa906c32378d9032750b291ea",
+    "run_cross_worker.py": "78e20f1d8a8176f227e734d08ae0dac5a0f95eaf14c0984d6ae271845dedcc36",
+    "extra-execution.json": "84f07f9dea42a72a04dddba0ec493fe4181bc107a3f8bf497396a217a58b9527",
+    "extra.log": "6b586c54469da0e2b1c8978506119ee3b1d429bbc364828b3bc4dba90301cc58",
+    "extra-execution.json.before-F16": "7c800d08d94391b5ed122a948af1d2aba5f636c49cf3e2eaad8cb054631734cb",
+    "extra.log.before-F16": "f9a11a8f742bea15b25b63d301337cfb140e5161a72fb750d48f7dc30fb15d93",
+    "browser-crud-execution.json": "1650b5b6b17c29c6434e9100ffce699692b9a147b82f114ee2ee218a167051f6",
+    "browser-crud.log": "72384422b46dd40fee6b96744d28801b8becc7cf9f9608234fc76f99dcbc73a5",
+    "execution.json": "e43c4a48be89cd61682afa4908b7566a13e2fda1129daf0c07233f6518ac0540",
+    "pytest.log": "afb56c68e96247a5034d617d4835ed954fd27971998c62c1a872999060adf132",
+    "source-manifest-final.json": "5e2bfae8b091457f40bf2e58c34c8387e46e0555ce9cba64cee95bca82448257",
+    "execution.json.before-F16": "8c836f72c179445f34dfaf4bed069704b890d275b2faa91e08c255791b349d65",
+    "pytest.log.before-F16": "e16de74839892dabf9feae17da4bebea7ff0fed7907bf2e843006a329309b747",
+    "run_browser_crud.py": "136cb14ac4c7dc78d7240f2921ec1495a34168d2c48eb0b639d65ebbe293dbf1",
+    "browser_crud.py": "a4c56324a35ff125cc6a1c8cf400f321c9abece7636d267e199b3ec44b6ba2d6",
+    "local-rate-execution.json": "94686b7ba08950bf1178a5afcc063d488576322088eb271ac809ac284b5ad422",
+    "local-rate.log": "4f7d0ffe42322bfba52adb8864f58baa801d164500a9a37b38d39e0a507fe82c",
+    "run_local_rate.py": "2093f82d2e99d61aca995768cffb491a56a10fd19502f50468250bdf51e12c5b",
+    "browser-execution.json": "d0ad4e49c87d4baf6a55b34f94521ef206e4dd46c02d79e21afcdfa866b15b11",
+    "browser.log": "2935fd7897809d0231c0b278bc75c3dfa25f70a0f565861a7a4908ef3c1d02a6",
+    "run_extra.py": "43d0104ecca10784baee124052e5577711852a6e49ebca540abf79ed2647d721",
+    "browser-execution.json.attempt5": "2475aa7c135b404bf54e05f73b6599667a2b253fef36faa2fae5098391ea8ab5",
+    "browser.log.attempt5": "2935fd7897809d0231c0b278bc75c3dfa25f70a0f565861a7a4908ef3c1d02a6",
+    "browser-execution.json.attempt4": "36c3c6133502db61bff47255a07563f390a32bc367d0cf083da0a77a9e4838fe",
+    "browser.log.attempt4": "27cd543488466507e12da3b81822282f26a97b3e975c618e3cc48d4de8687385",
+    "browser-execution.json.attempt3": "e2c30c166a586cdc43cdc64dc06ad6e3a8f267840abf5a28d14397b4f8b0497d",
+    "browser.log.attempt3": "61bb056e074a7700597712feed4ae2fbcf67ce473ddfc430b27904fcba31c751",
+    "run_browser.py": "ad45a6d3fbf1688493dac84ce6f24e3507cefcb0cca541577de4886e9cb01515",
+    "browser.py": "19ec83a50baef65f9b7d7424616c6ad870f719470ef5b5539ca103575f27ae9e",
+    "source-manifest.json": "63a186eec3f6980c8001cce5408afe88ba4308e701ca0bcdb7d35d5f91dfaa76",
+    "run_all.py": "3fcf1346b09755ef0929952d3401a703121db78c52c262765461ef0aacfca9c4",
+    "browser-output/browser-crud-results.json": "6fc51bf74dd8f9748236d56832d27b9e47f2013034087bcb57b48e75548fae01",
+    "browser-output/final-locked.png": "a9aaf30c142dafc71ff2a0d938aed2416eae979f135bf3a8f56a4fc9e4212b9a",
+    "browser-output/locked-clean.png": "31e85b1c112e353394fc8a42dca98e2dfebdc33dca1172d16698cb91ee655601",
+    "browser-output/browser-results.json": "14938366fc5e6b8d411834554f72d414c82dc43f2577fcbfeee0bce2f329fc14",
+    "browser-output/server.log": "0670c608059121f036d2394274c66a0450534612fa965f87d59471c0a25c7047"
+  },
+  "final_gate": "passed_ready_for_authorized_local_deployment",
+  "final_backend_batches": {
+    "all_run": {
+      "passed": 86,
+      "exit_code": 0,
+      "seconds": 32.75
+    },
+    "final_concurrency_module": {
+      "passed": 14,
+      "exit_code": 0,
+      "seconds": 9.62,
+      "overlap_with_all_run": 13
+    },
+    "unique_cases_total": 87
+  },
+  "F16_after_fix": {
+    "same_rev_patch": [
+      200,
+      409
+    ],
+    "concurrent_new_item_revs": [
+      1,
+      2
+    ],
+    "cross_worker_items": 8,
+    "cross_worker_revs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cross_worker_patch": [
+      200,
+      409
+    ],
+    "state_rev_after_patch": 9,
+    "status": "retested_fixed"
+  },
+  "browser_post_F16": {
+    "events": [
+      {
+        "check": "OS isolation",
+        "result": "passed",
+        "uid": 65534,
+        "external_network": false,
+        "host_root_visible": false
+      },
+      {
+        "check": "Real service startup with SQLite/Alembic",
+        "result": "passed"
+      },
+      {
+        "check": "Browser register and save recovery code",
+        "result": "passed"
+      },
+      {
+        "check": "Personal instance disables additional registration",
+        "result": "passed"
+      },
+      {
+        "check": "Browser creates encrypted item and TOTP matches independent pyotp",
+        "result": "passed"
+      },
+      {
+        "check": "Real database does not contain test main/item plaintext or item TOTP secret",
+        "result": "passed"
+      },
+      {
+        "check": "Lock clears editor DOM and browser permitted clipboard",
+        "result": "passed",
+        "trigger": "existing lock button DOM click while editor overlay open"
+      },
+      {
+        "check": "Lock clears unsaved SMTP DOM",
+        "result": "passed"
+      },
+      {
+        "check": "Browser encrypted export; wrong password rejected; valid duplicate import",
+        "result": "passed"
+      },
+      {
+        "check": "Browser updates title/password through repaired revision path",
+        "result": "passed"
+      },
+      {
+        "check": "Browser deletion persists one tombstone",
+        "result": "passed"
+      },
+      {
+        "check": "Browser reload decrypts retained imported item after CRUD",
+        "result": "passed"
+      },
+      {
+        "check": "Browser post-F16 CRUD/import regression complete",
+        "result": "passed"
+      }
+    ],
+    "requests": [
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/auth/registration-status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/register",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/audit?limit=100",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/folders",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/items",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail/events",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail/templates",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/mail",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/backup/list",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings/backup",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/vault/import",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/items/5b6a4af2-869d-4d0d-bb0c-e817b8466481",
+        "method": "PATCH",
+        "status": 200
+      },
+      {
+        "path": "/api/items/5b6a4af2-869d-4d0d-bb0c-e817b8466481?rev=19",
+        "method": "DELETE",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/prelogin",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/vault",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "status": 200
+      }
+    ],
+    "browser_errors": [],
+    "smtp_messages": 0
+  },
+  "source_manifest_final": {
+    "backend/app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/app/main.py": "bc2ee337bdd320e9e0106c485ae5945ca7be9e20a09e05232858b1e3808a9535",
+    "backend/app/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/app/api/vault.py": "1919c5b9b94e096042a247369fa26081cd9b18202c45e44e9b03cc0ffce25702",
+    "backend/app/api/auth.py": "3703f98e6cd4fdf72089ad8b4ffe972e5a0f2544be5584170e628dad5a7824d6",
+    "backend/app/api/health.py": "39a98ad6180539d98afbafd0dc807ff7c8488673cb55a4893e82083ebf87edf1",
+    "backend/app/api/backup.py": "8bbecb67e5e84dfc832e60d0a310f9c8facff49d4896b0b001154c12f0b985e2",
+    "backend/app/api/audit.py": "3041f088ec55b617b1cbfebf7aee1dc73a3be601d256134cfc795bdecfd8aa8f",
+    "backend/app/api/settings.py": "407be44ef1127c33cb357f802109aa6e4a41811b346f156fef56ba01bb19d527",
+    "backend/app/core/db.py": "a3b18a342b5ce276848ecaf3f0dba7d61f0bedd70fa5d9eb190567984efd70e2",
+    "backend/app/core/rate_limit.py": "dd44dbad451dd016603e4a89ef6080b0dd4a3dcbe6e19a0c072ce959f03ec853",
+    "backend/app/core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/app/core/errors.py": "6f794e4fdb8c6dc8613442d77a953455e78679bc7b4de96c809c7cedef1bdb63",
+    "backend/app/core/migrate.py": "86fee09bccbfb9d0ba8610bbbaaf51ab13802f973992c55012053b3a0a24bbcd",
+    "backend/app/core/ownership.py": "2980fa81bd4c70c8f297d8886f7a84efa8d9f95a57a78758185f1dc90bc67130",
+    "backend/app/core/security.py": "042f6c3ca34601d605d896716b29899edddaad729c3dcd0504865c446b34940b",
+    "backend/app/core/deps.py": "cd2e1255db3a1300393c6139b5963f475a8a9640aef742c0c7ad69db493fd9a0",
+    "backend/app/core/runtime_security.py": "2af410dba27af7ea8d040ce576aa8943a80d5525591ba71e20eba1f724d2c0f1",
+    "backend/app/core/config.py": "508c1a6106d7323974315b13ece6a28f9fe74283069e880b808c2162ef696499",
+    "backend/app/schemas/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/app/schemas/vault.py": "d1f263c6ca5493b3437d995e0342b2c07be31d1f6b79fa9f569fe7316ff44543",
+    "backend/app/schemas/auth.py": "67e06e1f8a78363cd7f8c743cbd7ac3281b4a140dd133eda227617080b83b1d1",
+    "backend/app/schemas/settings.py": "211dd51ffe207818a42932b988bdbae2144df83b22d49f04ebe46e7ac1f67c5a",
+    "backend/app/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/app/services/mailer.py": "2ccc54ce67023bad44570ac804dd8745b66eea74ae0f3bcb2213dc8fe288d955",
+    "backend/app/services/mail_events.py": "8e23d04487161c5d487f056d12acbbae6fa84a4e2f45d7d3bab9aca9bfe1f709",
+    "backend/app/services/auth_service.py": "2f9053fca5787b09f784892fec12437ad4c3d5b4746414064e5657ba018d43c1",
+    "backend/app/services/vault_service.py": "daa806fe361eafdaa9535e2ed0eead9754be1e2e74083c044cf7a06b838d6970",
+    "backend/app/services/backup_service.py": "7d60194e8829e6c9de5c3ae091926ca0d02554b7da5254eb65db8e7922170386",
+    "backend/app/services/secrets.py": "f897f164a85e6a3d337bfa49ff0f45b91cedfd6ec2dc9d2ef13740e1bbe77654",
+    "backend/app/models/base.py": "7503c1e6731f09519c31f201ad4f7d8947f8f6e775b78d5048b9a3132112f09a",
+    "backend/app/models/__init__.py": "00db266ebe9dc37e466b45d82b048eee6650275e37737c83a890849571386355",
+    "backend/app/models/vault.py": "d7abdc200a75a8748b58255bc26804da06ba3f2d50678adacd021da6588b812e",
+    "backend/app/models/settings.py": "daa1132deb83286da35440a7632331ebac9958c01d28b807b449c33a6fd43a60",
+    "backend/app/models/user.py": "c15666c7a5e0f34c57710aebfebd76bc9b496702029db7f027760df895106d33",
+    "backend/app/jobs/backup_job.py": "8ef86c2121fed70ae898bcd1121a09b42a4f0b7f9b98e85c4f0dfabd3ac768a4",
+    "backend/app/jobs/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/tests/test_vault.py": "d684c0ea1c4a51d1d26760b14f4d9815a7d60050ca7859a8b342c9ce5856f578",
+    "backend/tests/conftest.py": "de40a9dd25fb8e138a8a37741acf9679d80da3b9f30c627bd09fe5ffebb3fa01",
+    "backend/tests/test_runtime_security.py": "67f630cd564bbddf9e8006081d17e8dc7396a6a76c3c080fb499c2d579372d14",
+    "backend/tests/test_startup.py": "c50913076f4af55782712cff3cd2cab310211e6dd574799a72a39708baca0f0f",
+    "backend/tests/test_db.py": "8579314bf8ff29724ffdc2b927da96ed6e0f7fc7e7a73fb898231320359aa7e0",
+    "backend/tests/test_runtime_http.py": "43e84ccc3a08e1650ccfb259c14d7b126c56e131bbb184387142ba1e96fb0cca",
+    "backend/tests/test_auth_migration.py": "8d7a0c004275a5bc9e246f8e87f1dd7616f18b894bb7c765c99c18ad245ea1ff",
+    "backend/tests/test_health.py": "3a5505bb5b0dada22edeb5d521dccde175119667dd26982fe528a51ae67d9c9f",
+    "backend/tests/test_settings_backup.py": "29757878749a2c356c96afce64a8c1ef40c2b986bbf4a84b339e3f1bab94b4ad",
+    "backend/tests/test_vault_concurrency_http.py": "ddff87ef1838ac5d70cb9b08563981f8f87d8a1c248ac24d724397c6caf03d10",
+    "backend/tests/test_auth.py": "a7c751fa327e224e53ac5c7f6043795945bf3e3e72def2bb9b0390adc82c0192",
+    "backend/tests/test_auth_security_http.py": "ed53de59777c69972affa605589de8c3db46b7621636259df8fff8d0de7ec10b",
+    "backend/migrations/script.py.mako": "6c706561bd92f7a60209c7f65c0d093946b93273a60e49de7735a3d5311983ec",
+    "backend/migrations/env.py": "d2e3a7c4eb0b8c815f14b917a90d81b68f997565cb8ac12eba6f77041f252536",
+    "backend/migrations/versions/76f27f4f7eb4_init_schema.py": "9ae2f8a2d7c146b5b49d8b32c1d093330aa1b7d4117b68afab5196e55cd85be0",
+    "backend/migrations/versions/8295d6f562e1_add_recovery_dek_nonce.py": "16bfafd534bc92bb49d54985ac1c9ef2c3996d60ed713e782904d91f12c217ba",
+    "backend/migrations/versions/cb9e7d12a301_security_auth_state.py": "82a4dd9d6e75fa6d968ca246007448f0f5462506c11e058208667407f410b3c9",
+    "backend/migrations/versions/a29122827fce_add_vault_state.py": "4323ef40d497c3430ae0be9003745a6bf4585fb979e2f41b7b8684e63c09f971",
+    "backend/scripts/smoke_auth.py": "aa2ea1ab8fa5e24d87b271ae914227b48cacaf35d165a0ac9febbf7755dd2a5f",
+    "backend/scripts/check_db.py": "0c8cba4ef1de63a7cc39dce974cea8e0c47dd4907d952d84481f20b42c82265e",
+    "backend/scripts/encrypted_backup.py": "3fb6c41b09ede0c56df4422a124d658dc7f4fd1f77a42da40df49a20c4b7a84f",
+    "backend/scripts/smoke_settings.py": "d79a2b9e8cb161e90683931461cedfe072f9cd6f5d04ce02138117fd1b0988d8",
+    "backend/scripts/smoke.sh": "d96a4382e657bf726db8a4676af55384e046bc024a80f8dda55e227db09a7ea7",
+    "backend/scripts/smoke_mail_events.py": "701e21f1a239fea427200d5b2aab1ea975f1fc651c92532156a36b65fed876bf",
+    "backend/scripts/smoke_burst_backup.py": "52abb79e8015527849d7caf9f7f771ffb1280b5ec7ded1c4f9b86f3856bcf4ae",
+    "backend/scripts/smoke_unlock_totp.py": "5242c4ef4141e0cdf4ca4be5202a77c27ddeaf0435892a484ee7c90b3a26ab16",
+    "backend/scripts/gen_register_payload.py": "50053373d9bd93db03c880d3f8572891dfcb6c03570c98c1266e890e304102d0",
+    "backend/scripts/smoke_vault.py": "73fdd485da15212cd48a45f434e635c605c1ad61838d2da3df66f0b47f795442"
+  }
+}

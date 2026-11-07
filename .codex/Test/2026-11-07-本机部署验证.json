@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-07T11:36:18.133049+08:00",
+  "git_head": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d",
+  "status": "deployed-local-awaiting-user-acceptance",
+  "release": "/opt/bypassword/releases/20261107T033324Z",
+  "entry": "http://localhost:899",
+  "listen": "127.0.0.1:899",
+  "service": [
+    "ActiveState=active",
+    "SubState=running",
+    "UnitFileState=enabled",
+    "MainPID=1138198",
+    "NRestarts=0",
+    "CapabilityBoundingSet=cap_net_bind_service",
+    "AmbientCapabilities=cap_net_bind_service",
+    "User=bypassword",
+    "ProtectHome=yes",
+    "ProtectSystem=strict",
+    "NoNewPrivileges=yes"
+  ],
+  "http": {
+    "checks": [
+      {
+        "host": "127.0.0.1",
+        "path": "/api/health",
+        "status": 200,
+        "no_store": true
+      },
+      {
+        "host": "localhost",
+        "path": "/",
+        "status": 200,
+        "no_store": true
+      },
+      {
+        "host": "localhost",
+        "path": "/api/auth/registration-status",
+        "status": 200,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/docs",
+        "status": 404,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/openapi.json",
+        "status": 404,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/.env",
+        "status": 404,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/unknown",
+        "status": 404,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/vault",
+        "status": 401,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/backup/list",
+        "status": 401,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/settings/mail",
+        "status": 401,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/health",
+        "status": 400,
+        "no_store": true
+      },
+      {
+        "host": "127.0.0.1",
+        "path": "/api/health",
+        "status": 200,
+        "no_store": true
+      }
+    ],
+    "health": {
+      "status": "ok",
+      "version": "0.1.0",
+      "db": "ok",
+      "env": "local"
+    },
+    "permissions": [
+      {
+        "path": "/var/lib/bypassword",
+        "mode": "0o700",
+        "uid": 997
+      },
+      {
+        "path": "/var/lib/bypassword/data",
+        "mode": "0o700",
+        "uid": 997
+      },
+      {
+        "path": "/var/lib/bypassword/backups",
+        "mode": "0o700",
+        "uid": 997
+      },
+      {
+        "path": "/var/lib/bypassword/keys",
+        "mode": "0o700",
+        "uid": 997
+      },
+      {
+        "path": "/var/lib/bypassword/data/vault.db",
+        "mode": "0o600",
+        "uid": 997
+      },
+      {
+        "path": "/var/lib/bypassword/keys/backup.key",
+        "mode": "0o600",
+        "uid": 997
+      },
+      {
+        "path": "/etc/bypassword/runtime.env",
+        "mode": "0o600",
+        "uid": 0
+      }
+    ],
+    "database_integrity": "ok",
+    "formal_counts": {
+      "users": 0,
+      "items": 0,
+      "folders": 0,
+      "installation_owner": 0
+    },
+    "data_backups_created": false,
+    "snapshots": []
+  },
+  "browser": {
+    "result": "passed",
+    "target": "actual formal 127.0.0.1:899 via fixed Unix socket relay",
+    "browser": "Chromium",
+    "initial_registration_visible": true,
+    "anonymous_admin_redirect": true,
+    "database": "ok",
+    "users_created": 0,
+    "page_errors": [],
+    "uid": 65534,
+    "outside_network": false,
+    "host_root_visible": false
+  },
+  "formal_counts_final": {
+    "users": 0,
+    "folders": 0,
+    "items": 0,
+    "installation_owner": 0
+  },
+  "data_backups_created": false,
+  "git_commit": false,
+  "external_smtp_tested": false,
+  "notes": [
+    "Real user browser/Windows-to-WSL localhost forwarding pending acceptance.",
+    "Formal Chromium used a fixed-target Unix socket relay inside an isolated namespace; direct 899 HTTP checks were separate.",
+    "systemd-analyze verify emitted warning about preexisting unrelated wzyp-view.service Restart=unless-stopped; that service was not changed."
+  ],
+  "evidence_dir": "/root/.local/state/bypw-resume-20261107"
+}

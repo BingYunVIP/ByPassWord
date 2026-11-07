@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>密码库 — Apple HIG 个人密码管理器 (Vue 3)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Marked.js (Markdown 渲染引擎) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Google Fonts Icons: Material Symbols Rounded (https://fonts.google.com/icons) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0" />
+  <!-- Maple Mono 全局等宽字体 (https://github.com/subframe7536/maple-font) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.0.18/index.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Maple Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+            mono: ['"Maple Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          },
+          colors: {
+            apple: {
+              blue: '#007AFF',
+              blueHover: '#0062CC',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 全局强制使用 Maple Mono 字体 */
+    *, body, input, button, select, textarea, code, pre {
+      font-family: 'Maple Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Google Material Symbols 图标字体豁免，确保正确渲染图标 */
+    .material-symbols-rounded {
+      font-family: 'Material Symbols Rounded' !important;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 1.2rem;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    body {
+      user-select: none;
+      overflow: hidden;
+    }
+
+    /* Apple macOS Sonoma 动态壁纸背景 */
+    .macos-bg-light {
+      background:
+        radial-gradient(at 10% 12%, rgba(0, 122, 255, 0.16) 0px, transparent 50%),
+        radial-gradient(at 88% 15%, rgba(88, 86, 214, 0.14) 0px, transparent 50%),
+        radial-gradient(at 75% 88%, rgba(16, 185, 129, 0.13) 0px, transparent 50%),
+        #E6EBF2;
+    }
+
+    .macos-bg-dark {
+      background:
+        radial-gradient(at 10% 12%, rgba(10, 132, 255, 0.22) 0px, transparent 50%),
+        radial-gradient(at 88% 15%, rgba(94, 92, 230, 0.20) 0px, transparent 50%),
+        radial-gradient(at 75% 88%, rgba(16, 185, 129, 0.14) 0px, transparent 50%),
+        #090A0F;
+    }
+
+    /* 苹果 HIG 毛玻璃主窗口 */
+    .hig-window-light {
+      background: rgba(246, 247, 249, 0.82);
+      backdrop-filter: blur(40px) saturate(190%);
+      -webkit-backdrop-filter: blur(40px) saturate(190%);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.75) inset;
+    }
+
+    .hig-window-dark {
+      background: rgba(24, 24, 28, 0.84);
+      backdrop-filter: blur(40px) saturate(190%);
+      -webkit-backdrop-filter: blur(40px) saturate(190%);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+
+    /* 苹果 HIG 详情区卡片 */
+    .hig-card-light {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .hig-card-dark {
+      background: rgba(38, 38, 43, 0.80);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+    }
+
+    /* Markdown 渲染样式 */
+    .markdown-body {
+      font-size: 0.78rem;
+      line-height: 1.65;
+      word-break: break-word;
+      user-select: text;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      font-weight: 700;
+      margin-top: 0.5rem;
+      margin-bottom: 0.35rem;
+      color: #007AFF;
+    }
+    .markdown-body p {
+      margin-bottom: 0.45rem;
+    }
+    .markdown-body ul, .markdown-body ol {
+      padding-left: 1.25rem;
+      margin-bottom: 0.45rem;
+      list-style: disc;
+    }
+    .markdown-body code {
+      padding: 0.12rem 0.35rem;
+      border-radius: 0.35rem;
+      background: rgba(0, 122, 255, 0.12);
+      color: #007AFF;
+      font-weight: 600;
+    }
+    .markdown-body pre {
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 17, 23, 0.92);
+      color: #10B981;
+      overflow-x: auto;
+      margin: 0.45rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .markdown-body pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.45rem 0;
+    }
+    .markdown-body th, .markdown-body td {
+      border: 1px solid rgba(156, 163, 175, 0.25);
+      padding: 0.35rem 0.6rem;
+      text-align: left;
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 0.35rem;
+      height: 0.35rem;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.38);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.65);
+    }
+
+    .spring-btn {
+      transition: all 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+  <div id="app" class="h-full w-full" @click="closeAllDropdowns">
+    <div
+      :class="isDark ? 'dark macos-bg-dark text-zinc-100' : 'macos-bg-light text-zinc-900'"
+      class="h-full w-full flex items-center justify-center p-0 sm:p-2 transition-colors duration-300"
+    >
+      <!-- 主窗口容器 -->
+      <div
+        :class="[
+          isDark ? 'hig-window-dark border-white/10' : 'hig-window-light border-black/10',
+          windowBlurred && securityConfig.blurOnBlur ? 'blur-xl scale-[0.99]' : ''
+        ]"
+        class="relative w-full h-full sm:rounded-2xl border flex flex-col overflow-hidden transition-all duration-300"
+      >
+        <!-- =========================================================
+             第一行：顶栏
+             左栏：Logo + 主行：密码库 + 副行：● AES-256 已解锁
+             右栏：搜索框 | 图标+"新建条目" | 图标+"密码生成器" | 图标+"黑白切换" | 锁定
+        ========================================================== -->
+        <header :class="isDark ? 'border-white/10 bg-white/[0.02]' : 'border-black/[0.08] bg-white/55'" class="h-[4.2rem] border-b flex items-center shrink-0 z-20">
+          
+          <!-- 第一行左区（与左侧文件夹栏严格同宽 w-[16.5rem]） -->
+          <div :class="isDark ? 'border-white/10' : 'border-black/[0.08]'" class="w-[16.5rem] shrink-0 h-full px-4 border-r flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white shadow-md shrink-0">
+              <span class="material-symbols-rounded text-2xl text-white">verified_user</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold tracking-tight truncate">密码库</span>
+                <span
+                  @click="openSettings('crypto')"
+                  class="text-[0.65rem] px-1.5 py-0.5 rounded bg-[#007AFF]/15 text-[#007AFF] font-semibold cursor-pointer hover:bg-[#007AFF] hover:text-white spring-btn"
+                  title="点击配置加密标准与KDF"
+                >
+                  {{ securityConfig.kdfType }}
+                </span>
+              </div>
+              <div class="text-[0.68rem] text-emerald-500 font-medium flex items-center gap-1.5 mt-0.5 truncate">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span class="truncate">{{ shortCipherName }} 已解锁</span>
+                <span :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-[0.62rem] ml-auto shrink-0 flex items-center gap-0.5">
+                  <span class="material-symbols-rounded text-[0.8rem] text-amber-500">schedule</span>
+                  {{ formatIdleTime(idleRemainingSeconds) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第一行右区：搜索框 + 功能按钮组（已按要求彻底删除分辨率字号按钮） -->
+          <div class="flex-1 h-full px-4 flex items-center justify-between gap-3 overflow-x-auto">
+            <!-- 搜索框 -->
+            <div class="relative flex-1 max-w-md min-w-[12rem]">
+              <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[#007AFF] text-base">search</span>
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="搜索网站、账号、IP、卡号、恢复密钥或备注..."
+                :class="isDark ? 'bg-white/10 text-white placeholder-zinc-400 focus:bg-white/15 border-white/10' : 'bg-black/[0.05] text-zinc-900 placeholder-zinc-500 focus:bg-white border-black/5'"
+                class="w-full pl-9 pr-7 py-2 rounded-xl text-xs border focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 outline-none spring-btn"
+              />
+              <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-rose-500">
+                <span class="material-symbols-rounded text-sm">cancel</span>
+              </button>
+            </div>
+
+            <!-- 右侧按钮组 -->
+            <div class="flex items-center gap-2 shrink-0">
+              <!-- 图标+"新建条目"的按钮 -->
+              <button @click="openCreateModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm flex items-center gap-1.5 spring-btn">
+                <span class="material-symbols-rounded text-base text-white">add_circle</span>
+                <span>新建条目</span>
+              </button>
+
+              <!-- 图标+"密码生成器"的按钮 -->
+              <button @click="openGeneratorModal(false)" :class="isDark ? 'bg-white/10 hover:bg-white/15 text-zinc-100 border-white/10' : 'bg-white/85 hover:bg-white text-zinc-800 border-black/10'" class="px-3 py-2 rounded-xl text-xs font-medium border flex items-center gap-1.5 shadow-sm spring-btn">
+                <span class="material-symbols-rounded text-base text-emerald-500">vpn_key</span>
+                <span>密码生成器</span>
+              </button>
+
+              <!-- 图标+"黑白切换"的按钮 -->
+              <button @click="toggleTheme()" :class="isDark ? 'bg-white/10 hover:bg-white/15 text-amber-300 border-white/10' : 'bg-white/85 hover:bg-white text-zinc-800 border-black/10'" class="px-3 py-2 rounded-xl text-xs font-medium border flex items-center gap-1.5 shadow-sm spring-btn">
+                <span class="material-symbols-rounded text-base" :class="isDark ? 'text-amber-400' : 'text-indigo-500'">
+                  {{ isDark ? 'light_mode' : 'dark_mode' }}
+                </span>
+                <span>黑白切换</span>
+              </button>
+
+              <!-- 锁定按钮 -->
+              <button @click="lockVault('手动点击顶栏锁定按钮')" :class="isDark ? 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/25' : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'" class="px-3 py-2 rounded-xl text-xs font-medium border flex items-center gap-1.5 shadow-sm spring-btn">
+                <span class="material-symbols-rounded text-base text-rose-500">lock</span>
+                <span>锁定</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- =========================================================
+             下方三栏主体区：左栏(文件夹与健康度) | 中栏(列表区) | 右栏(多态详情区)
+        ========================================================== -->
+        <div class="flex-1 flex overflow-hidden">
+          
+          <!-- ==================== 左栏：导航与文件夹区 (w-[16.5rem]) ==================== -->
+          <aside :class="isDark ? 'border-white/10 bg-black/20' : 'border-black/[0.08] bg-white/40'" class="w-[16.5rem] shrink-0 h-full border-r flex flex-col justify-between p-3 overflow-y-auto">
+            
+            <!-- 上半部分：新建文件夹按钮 + 文件夹列表 -->
+            <div class="space-y-1.5">
+              <!-- 图标+"新建文件夹"的按钮 -->
+              <button @click="openFolderModal()" :class="isDark ? 'bg-white/10 hover:bg-white/15 text-zinc-100 border-white/10' : 'bg-white/90 hover:bg-white text-zinc-800 border-black/10'" class="w-full py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 shadow-sm spring-btn">
+                <span class="material-symbols-rounded text-base text-[#007AFF]">create_new_folder</span>
+                <span>新建文件夹</span>
+              </button>
+
+              <!-- 全部条目总览 -->
+              <button @click="selectedFolderId = 'ALL'"
+                :class="selectedFolderId === 'ALL' ? 'bg-[#007AFF] text-white shadow-sm' : (isDark ? 'text-zinc-300 hover:bg-white/10' : 'text-zinc-700 hover:bg-black/5')"
+                class="w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between spring-btn">
+                <div class="flex items-center gap-2.5 truncate">
+                  <span class="material-symbols-rounded text-base" :class="selectedFolderId === 'ALL' ? 'text-white' : 'text-[#007AFF]'">grid_view</span>
+                  <span>所有密码条目</span>
+                </div>
+                <span :class="selectedFolderId === 'ALL' ? 'bg-white/20 text-white' : (isDark ? 'bg-white/10 text-zinc-400' : 'bg-black/5 text-zinc-500')" class="text-[0.65rem] px-1.5 py-0.2 rounded-md">
+                  {{ items.length }}
+                </span>
+              </button>
+
+              <div :class="isDark ? 'border-white/10' : 'border-black/[0.06]'" class="border-t my-1"></div>
+
+              <!-- 文件夹列表（支持自定义图片、中转站 ChatGPT 图标、Google Material 彩色图标、排序/重命名/删除） -->
+              <div class="space-y-1">
+                <div v-for="(folder, index) in folders" :key="folder.id"
+                  @click="selectedFolderId = folder.id"
+                  :class="[
+                    selectedFolderId === folder.id
+                      ? 'bg-[#007AFF] text-white shadow-sm'
+                      : (isDark ? 'text-zinc-300 hover:bg-white/10' : 'text-zinc-700 hover:bg-black/5')
+                  ]"
+                  class="group w-full px-2.5 py-2 rounded-xl text-xs font-medium flex items-center justify-between cursor-pointer spring-btn"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <!-- 1. 用户上传的自定义图片图标 -->
+                    <img
+                      v-if="folder.customImage"
+                      :src="folder.customImage"
+                      class="w-4 h-4 rounded object-cover shrink-0"
+                      alt="folder"
+                    />
+                    <!-- 2. 中转站使用 ChatGPT 彩色图标 -->
+                    <img
+                      v-else-if="folder.iconType === 'chatgpt' || folder.id === 'relay'"
+                      src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64"
+                      class="w-4 h-4 rounded-sm object-contain shrink-0"
+                      alt="ChatGPT"
+                    />
+                    <!-- 3. Google Fonts Material 彩色图标 -->
+                    <span
+                      v-else
+                      class="material-symbols-rounded text-base shrink-0"
+                      :class="selectedFolderId === folder.id ? 'text-white' : folder.color"
+                    >{{ folder.gIcon }}</span>
+
+                    <span class="truncate" :title="folder.desc || folder.name">{{ folder.name }}</span>
+                  </div>
+
+                  <!-- 右侧：排序/重命名/删除按钮与数量统计 -->
+                  <div class="flex items-center gap-0.5 shrink-0">
+                    <div class="hidden group-hover:flex items-center gap-0.5 mr-1">
+                      <button @click.stop="moveFolder(index, -1)" :disabled="index === 0" title="上移" class="p-0.5 rounded hover:bg-black/20 disabled:opacity-30">
+                        <span class="material-symbols-rounded text-xs">keyboard_arrow_up</span>
+                      </button>
+                      <button @click.stop="moveFolder(index, 1)" :disabled="index === folders.length - 1" title="下移" class="p-0.5 rounded hover:bg-black/20 disabled:opacity-30">
+                        <span class="material-symbols-rounded text-xs">keyboard_arrow_down</span>
+                      </button>
+                      <button @click.stop="openRenameFolderModal(folder)" title="重命名与更换图标" class="p-0.5 rounded hover:bg-black/20">
+                        <span class="material-symbols-rounded text-xs">edit</span>
+                      </button>
+                      <button @click.stop="deleteFolder(folder.id)" title="删除文件夹" class="p-0.5 rounded hover:bg-rose-500/40">
+                        <span class="material-symbols-rounded text-xs">delete</span>
+                      </button>
+                    </div>
+                    <span :class="selectedFolderId === folder.id ? 'bg-white/20 text-white' : (isDark ? 'bg-white/10 text-zinc-400' : 'bg-black/5 text-zinc-500')" class="text-[0.65rem] px-1.5 py-0.2 rounded-md">
+                      {{ getFolderCount(folder.id) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 下半部分：设置 + 安全健康度 -->
+            <div class="space-y-2.5 pt-3 border-t" :class="isDark ? 'border-white/10' : 'border-black/[0.08]'">
+              <!-- 图标+设置 -->
+              <button @click="openSettings('account')"
+                :class="isDark ? 'text-zinc-200 hover:bg-white/10 bg-white/[0.03] border-white/10' : 'text-zinc-800 hover:bg-black/5 bg-white/60 border-black/5'"
+                class="w-full px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between spring-btn">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-rounded text-base text-[#007AFF]">settings</span>
+                  <span>设置</span>
+                </div>
+                <span class="text-[0.62rem] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-bold">
+                  审计 {{ auditLogs.length }}
+                </span>
+              </button>
+
+              <!-- 安全健康度模块 -->
+              <div :class="isDark ? 'bg-white/[0.05] border-white/10' : 'bg-white/85 border-black/[0.06]'" class="p-3 rounded-xl border space-y-2">
+                <!-- 第一行：图标+安全健康度 xxx -->
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-1.5 font-semibold">
+                    <span class="material-symbols-rounded text-base text-emerald-500">health_and_safety</span>
+                    <span>安全健康度</span>
+                  </div>
+                  <span class="font-bold text-emerald-500">{{ securityHealthScore }}%</span>
+                </div>
+
+                <!-- 第二行：进度条 -->
+                <div :class="isDark ? 'bg-white/10' : 'bg-black/10'" class="w-full h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-gradient-to-r from-[#007AFF] to-emerald-500 h-full rounded-full transition-all duration-500" :style="{ width: securityHealthScore + '%' }"></div>
+                </div>
+
+                <!-- 第三行：共 xx 项数据 | 导出按钮 -->
+                <div class="flex items-center justify-between text-[0.68rem] pt-0.5">
+                  <span :class="isDark ? 'text-zinc-400' : 'text-zinc-500'">共 {{ items.length }} 项数据</span>
+                  <button @click="exportVaultBackup()" class="px-2 py-0.5 rounded-md bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white font-semibold spring-btn">
+                    导出
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </aside>
+
+          <!-- ==================== 中栏：列表区 (w-[22rem]) ==================== -->
+          <section :class="isDark ? 'border-white/10 bg-white/[0.01]' : 'border-black/[0.08] bg-white/30'" class="w-[22rem] shrink-0 h-full border-r flex flex-col">
+            
+            <!-- 列表顶部：文件夹名称 + 条目类型筛选 -->
+            <div :class="isDark ? 'border-white/10' : 'border-black/[0.06]'" class="p-3 border-b space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="truncate">{{ currentFolderName }}</span>
+                <span :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-[0.68rem] font-medium">{{ filteredItems.length }} 项</span>
+              </div>
+              <div class="grid grid-cols-5 gap-1">
+                <button
+                  v-for="t in typeFilterOptions"
+                  :key="t.value"
+                  @click="selectedTypeFilter = t.value"
+                  :class="selectedTypeFilter === t.value ? 'bg-[#007AFF] text-white font-bold shadow-sm' : (isDark ? 'bg-white/5 text-zinc-400 hover:bg-white/10' : 'bg-black/5 text-zinc-600 hover:bg-black/10')"
+                  class="py-1 rounded-lg text-[0.65rem] text-center spring-btn truncate"
+                >
+                  {{ t.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表滚动容器 -->
+            <div class="flex-1 overflow-y-auto p-2.5 space-y-1.5">
+              <div v-if="filteredItems.length === 0" class="h-60 flex flex-col items-center justify-center text-center px-4">
+                <span class="material-symbols-rounded text-4xl text-zinc-400/50 mb-2">folder_open</span>
+                <p class="text-xs font-medium opacity-70">当前分类暂无条目</p>
+                <button @click="openCreateModal()" class="mt-2 text-xs text-[#007AFF] hover:underline font-semibold">
+                  + 点击新建条目
+                </button>
+              </div>
+
+              <!-- 列表项：第一行：自动获取的网站图标/系统图标/银行图标 | 主行：名称 | 副行：邮箱/手机号/用户名 | 是否填写的2FA标签 -->
+              <div
+                v-for="item in filteredItems"
+                :key="item.id"
+                @click="selectItem(item.id)"
+                :class="[
+                  selectedItemId === item.id
+                    ? 'bg-[#007AFF] text-white shadow-sm'
+                    : (isDark ? 'hover:bg-white/[0.06] text-zinc-100' : 'hover:bg-white/75 text-zinc-900')
+                ]"
+                class="p-3 rounded-xl flex items-center justify-between gap-3 cursor-pointer spring-btn"
+              >
+                <!-- 左侧：自动从网站获取的真实图标（或对应 VPS 系统/银行卡/安全笔记彩色图标） -->
+                <div :class="selectedItemId === item.id ? 'bg-white border-white/40' : (isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10')" class="w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                  <!-- 网站：自动抓取网站 Favicon -->
+                  <img
+                    v-if="item.type === 'website' && getFaviconUrl(item.url) && !faviconErrorMap[item.id]"
+                    :src="getFaviconUrl(item.url)"
+                    @error="faviconErrorMap[item.id] = true"
+                    class="w-6 h-6 object-contain rounded-sm"
+                    alt="icon"
+                  />
+                  <!-- VPS：显示所选操作系统的彩色品牌图标 -->
+                  <img
+                    v-else-if="item.type === 'vps' && getOsMeta(item.vpsOs).logoUrl"
+                    :src="getOsMeta(item.vpsOs).logoUrl"
+                    class="w-6 h-6 object-contain"
+                    alt="os"
+                  />
+                  <!-- 银行卡：显示所选银行/卡组织的彩色图标 -->
+                  <img
+                    v-else-if="item.type === 'bank' && getBankMeta(item.cardType).logoUrl && !faviconErrorMap['bank_' + item.id]"
+                    :src="getBankMeta(item.cardType).logoUrl"
+                    @error="faviconErrorMap['bank_' + item.id] = true"
+                    class="w-6 h-6 object-contain rounded-sm"
+                    alt="bank"
+                  />
+                  <span v-else class="material-symbols-rounded text-xl" :class="getItemFallbackIconColor(item, selectedItemId === item.id)">
+                    {{ getItemFallbackIconName(item) }}
+                  </span>
+                </div>
+
+                <!-- 中间：主行 + 副行 -->
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold truncate flex items-center gap-1.5">
+                    <span class="truncate">{{ item.title }}</span>
+                    <span v-if="item.favorite" class="material-symbols-rounded text-amber-400 text-sm shrink-0">star</span>
+                  </div>
+                  <div :class="selectedItemId === item.id ? 'text-white/85' : (isDark ? 'text-zinc-400' : 'text-zinc-500')" class="text-[0.68rem] truncate mt-0.5">
+                    <template v-if="item.type === 'website'">{{ item.account }}</template>
+                    <template v-else-if="item.type === 'vps'">{{ item.sshUser || 'root' }}@{{ item.ipAddress }}:{{ item.sshPort || '22' }}</template>
+                    <template v-else-if="item.type === 'bank'">{{ item.cardHolder }} · {{ maskCardNumber(item.cardNumber) }}</template>
+                    <template v-else-if="item.type === 'note'">Markdown 加密笔记</template>
+                  </div>
+                </div>
+
+                <!-- 右侧：是否填写的 2FA 标签（或对应类型标签） -->
+                <div class="shrink-0">
+                  <template v-if="item.type === 'website'">
+                    <span v-if="item.totpSecret"
+                      :class="selectedItemId === item.id ? 'bg-white/25 text-white border-white/30' : 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30'"
+                      class="text-[0.62rem] px-2 py-0.5 rounded-md border font-bold inline-flex items-center gap-0.5">
+                      <span class="material-symbols-rounded text-xs">verified_user</span> 2FA
+                    </span>
+                    <span v-else
+                      :class="selectedItemId === item.id ? 'bg-black/20 text-white/75' : (isDark ? 'bg-white/5 text-zinc-500' : 'bg-black/5 text-zinc-400')"
+                      class="text-[0.62rem] px-2 py-0.5 rounded-md font-medium inline-block">
+                      未设2FA
+                    </span>
+                  </template>
+                  <span v-else-if="item.type === 'vps'"
+                    :class="selectedItemId === item.id ? 'bg-white/25 text-white' : 'bg-purple-500/15 text-purple-500'"
+                    class="text-[0.62rem] px-2 py-0.5 rounded-md font-bold inline-block">
+                    {{ item.vpsCores }}C/{{ item.vpsRam }}G
+                  </span>
+                  <span v-else-if="item.type === 'bank'"
+                    :class="selectedItemId === item.id ? 'bg-white/25 text-white' : 'bg-rose-500/15 text-rose-500'"
+                    class="text-[0.62rem] px-2 py-0.5 rounded-md font-bold inline-block">
+                    {{ item.cardType }}
+                  </span>
+                  <span v-else-if="item.type === 'note'"
+                    :class="selectedItemId === item.id ? 'bg-white/25 text-white' : 'bg-amber-500/15 text-amber-500'"
+                    class="text-[0.62rem] px-2 py-0.5 rounded-md font-bold inline-block">
+                    笔记
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== 右栏：多态详情区 ==================== -->
+          <main class="flex-1 h-full overflow-y-auto p-6 lg:p-8">
+            <div v-if="selectedItem" class="max-w-3xl mx-auto space-y-4">
+              
+              <!-- 【第一行】图标（从网站获取或系统/银行图标） | 主行：名称（网站为超链接文本） | 收藏图标 | 图标+编辑按钮 | 图标+删除按钮 -->
+              <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                  <!-- 大图标 -->
+                  <div :class="isDark ? 'bg-white/10 border-white/15' : 'bg-white border-black/10'" class="w-12 h-12 p-2 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm">
+                    <img
+                      v-if="selectedItem.type === 'website' && getFaviconUrl(selectedItem.url) && !faviconErrorMap[selectedItem.id]"
+                      :src="getFaviconUrl(selectedItem.url)"
+                      @error="faviconErrorMap[selectedItem.id] = true"
+                      class="w-7 h-7 object-contain"
+                      alt="favicon"
+                    />
+                    <img
+                      v-else-if="selectedItem.type === 'vps' && getOsMeta(selectedItem.vpsOs).logoUrl"
+                      :src="getOsMeta(selectedItem.vpsOs).logoUrl"
+                      class="w-7 h-7 object-contain"
+                      alt="os"
+                    />
+                    <img
+                      v-else-if="selectedItem.type === 'bank' && getBankMeta(selectedItem.cardType).logoUrl && !faviconErrorMap['bank_' + selectedItem.id]"
+                      :src="getBankMeta(selectedItem.cardType).logoUrl"
+                      @error="faviconErrorMap['bank_' + selectedItem.id] = true"
+                      class="w-7 h-7 object-contain"
+                      alt="bank"
+                    />
+                    <span v-else class="material-symbols-rounded text-2xl" :class="getItemFallbackIconColor(selectedItem, false)">
+                      {{ getItemFallbackIconName(selectedItem) }}
+                    </span>
+                  </div>
+
+                  <!-- 主行：标题（网站为可点击超链接）+ 所属文件夹徽章 -->
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <a
+                        v-if="selectedItem.type === 'website'"
+                        :href="selectedItem.url || '#'"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-base font-bold text-[#007AFF] hover:underline inline-flex items-center gap-1 truncate max-w-full"
+                        title="点击在新标签页打开该网站"
+                      >
+                        <span class="truncate">{{ selectedItem.title }}</span>
+                        <span class="material-symbols-rounded text-base text-[#007AFF]">open_in_new</span>
+                      </a>
+                      <span v-else class="text-base font-bold truncate">{{ selectedItem.title }}</span>
+
+                      <!-- 所属文件夹彩色标签 -->
+                      <span :class="isDark ? 'bg-white/10 text-zinc-200' : 'bg-black/5 text-zinc-700'" class="text-[0.65rem] px-2 py-0.5 rounded-lg font-semibold inline-flex items-center gap-1">
+                        <img v-if="getFolderById(selectedItem.folderId).customImage" :src="getFolderById(selectedItem.folderId).customImage" class="w-3.5 h-3.5 rounded object-cover" />
+                        <img v-else-if="getFolderById(selectedItem.folderId).iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-3.5 h-3.5 object-contain" />
+                        <span v-else class="material-symbols-rounded text-xs" :class="getFolderById(selectedItem.folderId).color">{{ getFolderById(selectedItem.folderId).gIcon }}</span>
+                        <span>{{ getFolderById(selectedItem.folderId).name }}</span>
+                      </span>
+                    </div>
+
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-[0.68rem] truncate mt-0.5">
+                      <template v-if="selectedItem.type === 'website'">{{ selectedItem.url }}</template>
+                      <template v-else-if="selectedItem.type === 'vps'">{{ selectedItem.ipAddress }}:{{ selectedItem.sshPort }} · {{ selectedItem.vpsOs }}</template>
+                      <template v-else-if="selectedItem.type === 'bank'">{{ selectedItem.cardType }} · 持卡人：{{ selectedItem.cardHolder }}</template>
+                      <template v-else-if="selectedItem.type === 'note'">端到端 AES-256 加密笔记</template>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 右侧：收藏图标 | 图标+编辑按钮 | 图标+删除按钮 -->
+                <div class="flex items-center gap-2 shrink-0">
+                  <button
+                    @click="toggleFavorite(selectedItem)"
+                    :class="selectedItem.favorite ? 'bg-amber-400/20 text-amber-500 border-amber-400/40' : (isDark ? 'bg-white/5 text-zinc-400 border-white/10 hover:text-zinc-200' : 'bg-black/5 text-zinc-500 border-black/10 hover:text-zinc-800')"
+                    class="w-9 h-9 rounded-xl border flex items-center justify-center spring-btn"
+                    title="收藏/取消收藏"
+                  >
+                    <span class="material-symbols-rounded text-lg" :class="selectedItem.favorite ? 'text-amber-400' : ''">star</span>
+                  </button>
+
+                  <button
+                    @click="openEditModal(selectedItem)"
+                    :class="isDark ? 'bg-white/10 hover:bg-white/15 text-zinc-100 border-white/10' : 'bg-white hover:bg-zinc-100 text-zinc-800 border-black/10'"
+                    class="px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 shadow-sm spring-btn"
+                  >
+                    <span class="material-symbols-rounded text-base text-[#007AFF]">edit_square</span>
+                    <span>编辑</span>
+                  </button>
+
+                  <button
+                    @click="deleteItem(selectedItem.id)"
+                    :class="isDark ? 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border-rose-500/25' : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'"
+                    class="px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 shadow-sm spring-btn"
+                  >
+                    <span class="material-symbols-rounded text-base text-rose-500">delete</span>
+                    <span>删除</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- =========================================================
+                   详情模板 1：【网站】五段式详情（第5行：恢复密钥 Markdown 渲染）
+              ========================================================== -->
+              <template v-if="selectedItem.type === 'website'">
+                <!-- 第二行：副行：图标 + 邮箱 / 手机号 / 用户名 | 主行：xxxxx | 上下居中位置 复制按钮 -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl flex items-center justify-between gap-4">
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                      <span class="material-symbols-rounded text-base text-[#007AFF]">account_circle</span>
+                      <span>邮箱 / 手机号 / 用户名</span>
+                    </div>
+                    <div class="text-sm font-bold break-all select-all">
+                      {{ selectedItem.account }}
+                    </div>
+                  </div>
+                  <div class="self-center shrink-0">
+                    <button
+                      @click="copyText(selectedItem.account, '账号')"
+                      class="px-3.5 py-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white text-xs font-semibold flex items-center gap-1.5 spring-btn"
+                    >
+                      <span class="material-symbols-rounded text-base">content_copy</span>
+                      <span>复制</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第三行：副行：登录密码 | 主行：xxxxx | 显示/隐藏的按钮 复制按钮 -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl flex items-center justify-between gap-4">
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                      <span class="material-symbols-rounded text-base text-indigo-500">password</span>
+                      <span>登录密码</span>
+                    </div>
+                    <div v-if="!showPassword" class="text-base font-bold tracking-widest select-none">
+                      ••••••••••••••
+                    </div>
+                    <div v-else class="text-sm font-bold break-all select-all text-[#007AFF]">
+                      {{ selectedItem.password }}
+                    </div>
+                  </div>
+
+                  <div class="self-center flex items-center gap-2 shrink-0">
+                    <button
+                      @click="toggleSecretReveal()"
+                      :class="isDark ? 'bg-white/10 hover:bg-white/15 text-zinc-200 border-white/10' : 'bg-black/5 hover:bg-black/10 text-zinc-700 border-black/10'"
+                      class="px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 spring-btn"
+                    >
+                      <span class="material-symbols-rounded text-base text-amber-500">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+                      <span>{{ showPassword ? '隐藏' : '显示' }}</span>
+                    </button>
+
+                    <button
+                      @click="copyText(selectedItem.password, '登录密码')"
+                      class="px-3.5 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm spring-btn"
+                    >
+                      <span class="material-symbols-rounded text-base text-white">content_copy</span>
+                      <span>复制</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第四行：副行：2FA | 主行：xxxxx | 动态的圆形倒计时 复制按钮 -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl flex items-center justify-between gap-4">
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                      <span class="material-symbols-rounded text-base text-emerald-500">encrypted</span>
+                      <span>2FA</span>
+                    </div>
+                    <div v-if="selectedItem.totpSecret" class="text-lg font-bold tracking-wider text-emerald-500 select-all">
+                      {{ currentTotpCode.slice(0, 3) }} {{ currentTotpCode.slice(3, 6) }}
+                    </div>
+                    <div v-else :class="isDark ? 'text-zinc-500' : 'text-zinc-400'" class="text-xs font-medium">
+                      未配置 2FA 动态验证码密钥
+                    </div>
+                  </div>
+
+                  <div v-if="selectedItem.totpSecret" class="self-center flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-8 h-8 -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" :stroke="isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'" stroke-width="3.5"></circle>
+                        <circle
+                          cx="18" cy="18" r="14" fill="none"
+                          :stroke="totpRemaining <= 5 ? '#EF4444' : '#10B981'"
+                          stroke-width="3.5"
+                          stroke-dasharray="88"
+                          :stroke-dashoffset="88 - (88 * totpRemaining) / 30"
+                          stroke-linecap="round"
+                          class="transition-all duration-500"
+                        ></circle>
+                      </svg>
+                      <span class="text-xs font-bold w-6">{{ totpRemaining }}s</span>
+                    </div>
+
+                    <button
+                      @click="copyText(currentTotpCode, '2FA 验证码')"
+                      class="px-3.5 py-2 rounded-xl bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500 hover:text-white text-xs font-semibold flex items-center gap-1.5 spring-btn"
+                    >
+                      <span class="material-symbols-rounded text-base">content_copy</span>
+                      <span>复制</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第五行：恢复密钥（支持 Markdown 保存后渲染） -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5 font-semibold">
+                      <span class="material-symbols-rounded text-base text-amber-500">key_visualizer</span>
+                      <span>恢复密钥</span>
+                    </div>
+                    <button
+                      v-if="selectedItem.markdownContent"
+                      @click="copyText(selectedItem.markdownContent, '恢复密钥')"
+                      class="text-xs text-[#007AFF] hover:underline font-semibold flex items-center gap-1"
+                    >
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                      <span>复制恢复密钥</span>
+                    </button>
+                  </div>
+                  <div
+                    :class="isDark ? 'bg-black/30 border-white/10 text-zinc-200' : 'bg-black/[0.03] border-black/10 text-zinc-800'"
+                    class="p-4 rounded-xl border markdown-body"
+                    v-html="renderMarkdown(selectedItem.markdownContent || '暂无恢复密钥')"
+                  ></div>
+                </div>
+              </template>
+
+              <!-- =========================================================
+                   详情模板 2：【VPS】严格对齐 6 行结构，绝不乱加额外内容
+                   第1行：条目名称 + 所属文件夹（已在上方公共第一行展示）
+                   第2行：IP 地址 + SSH 端口
+                   第3行：操作系统(带图标+名称) + 到期日(YYYY-MM-DD + 每次/一次)
+                   第4行：核心数 + 运行内存(GB) + 磁盘内存(GB)
+                   第5行：用户名 + 登录密码
+                   第6行：SSH 私钥 (Markdown 渲染)
+              ========================================================== -->
+              <template v-else-if="selectedItem.type === 'vps'">
+                <!-- 第2行：IP 地址 | SSH 端口 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-[#007AFF]">dns</span>
+                        <span>IP 地址</span>
+                      </div>
+                      <div class="text-sm font-bold select-all">{{ selectedItem.ipAddress }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.ipAddress, 'IP 地址')" class="px-3 py-1.5 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white text-xs font-semibold flex items-center gap-1">
+                      <span class="material-symbols-rounded text-sm">content_copy</span> 复制
+                    </button>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-purple-500">terminal</span>
+                        <span>SSH 端口</span>
+                      </div>
+                      <div class="text-sm font-bold select-all">{{ selectedItem.sshPort || '22' }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.sshPort || '22', 'SSH 端口')" class="px-3 py-1.5 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white text-xs font-semibold flex items-center gap-1">
+                      <span class="material-symbols-rounded text-sm">content_copy</span> 复制
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第3行：操作系统（图标+名称） | 到期日（YYYY-MM-DD + 每次/一次） -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-cyan-500">computer</span>
+                        <span>操作系统</span>
+                      </div>
+                      <div class="text-sm font-bold flex items-center gap-2">
+                        <img v-if="getOsMeta(selectedItem.vpsOs).logoUrl" :src="getOsMeta(selectedItem.vpsOs).logoUrl" class="w-4 h-4 object-contain" />
+                        <span>{{ selectedItem.vpsOs }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-emerald-500">event_available</span>
+                        <span>到期日</span>
+                      </div>
+                      <div class="text-sm font-bold flex items-center gap-2">
+                        <span>{{ selectedItem.vpsExpiryDate || '2027-12-31' }}</span>
+                        <span :class="selectedItem.vpsExpiryCycle === '每次' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'" class="text-[0.65rem] px-2 py-0.5 rounded-md font-bold">
+                          {{ selectedItem.vpsExpiryCycle || '每次' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 第4行：核心数 | 运行内存 (GB) | 磁盘内存 (GB) -->
+                <div class="grid grid-cols-3 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                      <span class="material-symbols-rounded text-base text-indigo-500">memory</span>
+                      <span>核心数</span>
+                    </div>
+                    <div class="text-sm font-bold mt-1">{{ selectedItem.vpsCores }} 核 (vCPU)</div>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                      <span class="material-symbols-rounded text-base text-emerald-500">developer_board</span>
+                      <span>运行内存</span>
+                    </div>
+                    <div class="text-sm font-bold mt-1">{{ selectedItem.vpsRam }} GB</div>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                      <span class="material-symbols-rounded text-base text-amber-500">hard_drive</span>
+                      <span>磁盘内存</span>
+                    </div>
+                    <div class="text-sm font-bold mt-1">{{ selectedItem.vpsDisk }} GB</div>
+                  </div>
+                </div>
+
+                <!-- 第5行：用户名 | 登录密码 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1 min-w-0">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-[#007AFF]">person</span>
+                        <span>用户名</span>
+                      </div>
+                      <div class="text-sm font-bold select-all truncate">{{ selectedItem.sshUser || 'root' }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.sshUser || 'root', '用户名')" class="px-3 py-1.5 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white text-xs font-semibold flex items-center gap-1 shrink-0">
+                      <span class="material-symbols-rounded text-sm">content_copy</span> 复制
+                    </button>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between gap-2">
+                    <div class="space-y-1 min-w-0">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-rose-500">lock</span>
+                        <span>登录密码</span>
+                      </div>
+                      <div v-if="!showPassword" class="text-sm font-bold tracking-widest">••••••••••••</div>
+                      <div v-else class="text-sm font-bold text-[#007AFF] break-all select-all">{{ selectedItem.password }}</div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button @click="toggleSecretReveal()" :class="isDark ? 'bg-white/10' : 'bg-black/5'" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold">
+                        {{ showPassword ? '隐藏' : '显示' }}
+                      </button>
+                      <button @click="copyText(selectedItem.password, '登录密码')" class="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold">
+                        复制
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 第6行：SSH 私钥（支持 Markdown 渲染） -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5 font-semibold">
+                      <span class="material-symbols-rounded text-base text-purple-500">vpn_key</span>
+                      <span>SSH 私钥</span>
+                    </div>
+                    <button
+                      v-if="selectedItem.markdownContent"
+                      @click="copyText(selectedItem.markdownContent, 'SSH 私钥')"
+                      class="text-xs text-[#007AFF] hover:underline font-semibold flex items-center gap-1"
+                    >
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                      <span>复制 SSH 私钥</span>
+                    </button>
+                  </div>
+                  <div
+                    :class="isDark ? 'bg-black/30 border-white/10 text-zinc-200' : 'bg-black/[0.03] border-black/10 text-zinc-800'"
+                    class="p-4 rounded-xl border markdown-body"
+                    v-html="renderMarkdown(selectedItem.markdownContent || '暂无 SSH 私钥')"
+                  ></div>
+                </div>
+              </template>
+
+              <!-- =========================================================
+                   详情模板 3：【银行卡】严格对齐 5 行结构
+                   第1行：条目名称 + 所属文件夹（已在顶部公共第1行展示）
+                   第2行：姓名 + 类型（带彩色图标+名称）
+                   第3行：银行卡卡号
+                   第4行：有效期(MM-DD) + 安全码 + 交易密码
+                   第5行：备注 (Markdown 渲染)
+              ========================================================== -->
+              <template v-else-if="selectedItem.type === 'bank'">
+                <!-- 第2行：姓名 | 类型（图标+名称） -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-[#007AFF]">badge</span>
+                        <span>姓名</span>
+                      </div>
+                      <div class="text-sm font-bold select-all">{{ selectedItem.cardHolder }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.cardHolder, '姓名')" class="px-3 py-1.5 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white text-xs font-semibold">
+                      复制
+                    </button>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div class="space-y-1">
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                        <span class="material-symbols-rounded text-base text-rose-500">account_balance</span>
+                        <span>类型</span>
+                      </div>
+                      <div class="text-sm font-bold flex items-center gap-2">
+                        <img v-if="getBankMeta(selectedItem.cardType).logoUrl" :src="getBankMeta(selectedItem.cardType).logoUrl" class="w-4 h-4 object-contain rounded-sm" />
+                        <span>{{ selectedItem.cardType }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 第3行：银行卡卡号 -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl flex items-center justify-between gap-4">
+                  <div class="space-y-1">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5">
+                      <span class="material-symbols-rounded text-base text-indigo-500">credit_card</span>
+                      <span>银行卡卡号</span>
+                    </div>
+                    <div class="text-base font-bold tracking-wider select-all">
+                      {{ showPassword ? formatCardNumber(selectedItem.cardNumber) : maskCardNumber(selectedItem.cardNumber) }}
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button @click="toggleSecretReveal()" :class="isDark ? 'bg-white/10' : 'bg-black/5'" class="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1">
+                      <span class="material-symbols-rounded text-sm text-amber-500">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+                      {{ showPassword ? '隐藏' : '显示' }}
+                    </button>
+                    <button @click="copyText((selectedItem.cardNumber || '').replace(/\s+/g, ''), '银行卡卡号')" class="px-3.5 py-2 rounded-xl bg-[#007AFF] text-white text-xs font-semibold flex items-center gap-1">
+                      <span class="material-symbols-rounded text-sm">content_copy</span> 复制卡号
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第4行：有效期 (MM-DD) | 安全码 | 交易密码 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                        <span class="material-symbols-rounded text-base text-emerald-500">calendar_month</span>
+                        <span>有效期 (MM-DD)</span>
+                      </div>
+                      <div class="text-sm font-bold mt-1 select-all">{{ selectedItem.cardExpiry || '--' }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.cardExpiry, '有效期')" class="p-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white">
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                    </button>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                        <span class="material-symbols-rounded text-base text-rose-500">security</span>
+                        <span>安全码</span>
+                      </div>
+                      <div class="text-sm font-bold mt-1 text-rose-500 select-all">{{ showCardCvv ? selectedItem.cardCvv : '•••' }}</div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <button @click="showCardCvv = !showCardCvv" class="p-2 rounded-xl bg-black/5 dark:bg-white/10">
+                        <span class="material-symbols-rounded text-sm text-amber-500">{{ showCardCvv ? 'visibility_off' : 'visibility' }}</span>
+                      </button>
+                      <button @click="copyText(selectedItem.cardCvv, '安全码')" class="p-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white">
+                        <span class="material-symbols-rounded text-sm">content_copy</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1">
+                        <span class="material-symbols-rounded text-base text-amber-500">pin</span>
+                        <span>交易密码</span>
+                      </div>
+                      <div class="text-sm font-bold mt-1 text-[#007AFF] select-all">{{ showPassword ? selectedItem.password : '••••••' }}</div>
+                    </div>
+                    <button @click="copyText(selectedItem.password, '交易密码')" class="p-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white">
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 第5行：备注（支持 Markdown 渲染） -->
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5 font-semibold">
+                      <span class="material-symbols-rounded text-base text-amber-500">description</span>
+                      <span>备注</span>
+                    </div>
+                    <button
+                      v-if="selectedItem.markdownContent"
+                      @click="copyText(selectedItem.markdownContent, '备注')"
+                      class="text-xs text-[#007AFF] hover:underline font-semibold flex items-center gap-1"
+                    >
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                      <span>复制备注</span>
+                    </button>
+                  </div>
+                  <div
+                    :class="isDark ? 'bg-black/30 border-white/10 text-zinc-200' : 'bg-black/[0.03] border-black/10 text-zinc-800'"
+                    class="p-4 rounded-xl border markdown-body"
+                    v-html="renderMarkdown(selectedItem.markdownContent || '暂无备注')"
+                  ></div>
+                </div>
+              </template>
+
+              <!-- =========================================================
+                   详情模板 4：【安全笔记】（备注支持 Markdown 渲染）
+              ========================================================== -->
+              <template v-else-if="selectedItem.type === 'note'">
+                <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-5 rounded-2xl space-y-3">
+                  <div class="flex items-center justify-between pb-2 border-b" :class="isDark ? 'border-white/10' : 'border-black/10'">
+                    <div :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs flex items-center gap-1.5 font-semibold">
+                      <span class="material-symbols-rounded text-base text-amber-500">notes</span>
+                      <span>备注</span>
+                    </div>
+                    <button
+                      @click="copyText(selectedItem.markdownContent, '备注')"
+                      class="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold flex items-center gap-1"
+                    >
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                      <span>复制全文</span>
+                    </button>
+                  </div>
+                  <div
+                    :class="isDark ? 'bg-black/30 border-white/10 text-zinc-100' : 'bg-black/[0.03] border-black/10 text-zinc-800'"
+                    class="p-4 rounded-xl border markdown-body min-h-[12rem]"
+                    v-html="renderMarkdown(selectedItem.markdownContent || '暂无备注')"
+                  ></div>
+                </div>
+              </template>
+
+            </div>
+          </main>
+
+        </div>
+
+        <!-- =========================================================
+             弹窗 1：新建 / 编辑条目（严格遵循你的表单行布局、彩色图标下拉框、联动密码生成器）
+        ========================================================== -->
+        <div v-if="activeModal === 'editItem'" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" @click.self="activeModal = null">
+          <div :class="isDark ? 'hig-window-dark border-white/15 text-zinc-100' : 'hig-window-light border-black/10 text-zinc-900'" class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-rounded text-xl text-[#007AFF]">post_add</span>
+                <h3 class="font-bold text-sm">{{ editingForm.id ? '编辑条目' : '新建条目' }}</h3>
+              </div>
+              <button @click="activeModal = null" class="p-1 rounded-lg opacity-60 hover:opacity-100">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            <!-- 默认选择 4 种类型：网站、VPS、银行卡、安全笔记 -->
+            <div class="grid grid-cols-4 gap-2 text-xs">
+              <button
+                v-for="t in itemTypeOptions"
+                :key="t.value"
+                type="button"
+                @click="editingForm.type = t.value"
+                :class="editingForm.type === t.value ? 'bg-[#007AFF] text-white font-bold shadow-sm' : (isDark ? 'bg-white/5 text-zinc-300 border-white/10' : 'bg-white text-zinc-700 border-black/10')"
+                class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 spring-btn"
+              >
+                <span class="material-symbols-rounded text-base" :class="editingForm.type === t.value ? 'text-white' : t.color">{{ t.gIcon }}</span>
+                <span>{{ t.label }}</span>
+              </button>
+            </div>
+
+            <!-- ==================== 表单类型 A：网站 ==================== -->
+            <div v-if="editingForm.type === 'website'" class="space-y-3.5 text-xs">
+              <!-- 第1行：条目名称 | 所属文件夹（带彩色图标+名称的下拉框） -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">网站名称 *</label>
+                  <input v-model="editingForm.title" type="text" placeholder="如：GitHub / ChatGPT 中转站" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <!-- 所属文件夹自定义下拉选择器（加载图标+名称） -->
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">所属文件夹</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('folder')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img v-if="getFolderById(editingForm.folderId).customImage" :src="getFolderById(editingForm.folderId).customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="getFolderById(editingForm.folderId).iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="getFolderById(editingForm.folderId).color">{{ getFolderById(editingForm.folderId).gIcon }}</span>
+                      <span class="truncate">{{ getFolderById(editingForm.folderId).name }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'folder'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-48 overflow-y-auto p-1">
+                    <button
+                      v-for="f in folders"
+                      :key="f.id"
+                      type="button"
+                      @click="editingForm.folderId = f.id; openDropdownName = null"
+                      :class="editingForm.folderId === f.id ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2 text-left"
+                    >
+                      <img v-if="f.customImage" :src="f.customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="f.iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="editingForm.folderId === f.id ? 'text-white' : f.color">{{ f.gIcon }}</span>
+                      <span class="truncate">{{ f.name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 网址 URL（自动抓取网站图标，已按要求删除"使用ChatGPT图标"复选框） -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">网站网址 URL（自动抓取网站图标）</label>
+                <div class="flex items-center gap-2">
+                  <div :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0">
+                    <img v-if="getFaviconUrl(editingForm.url)" :src="getFaviconUrl(editingForm.url)" class="w-5 h-5 object-contain" />
+                    <span v-else class="material-symbols-rounded text-base text-[#007AFF]">language</span>
+                  </div>
+                  <input v-model="editingForm.url" type="text" placeholder="https://github.com" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="flex-1 px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+              </div>
+
+              <!-- 邮箱 / 手机号 / 用户名 -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">邮箱 / 手机号 / 用户名 *</label>
+                <input v-model="editingForm.account" type="text" placeholder="user@example.com" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+              </div>
+
+              <!-- 登录密码（点击"随机生成强密码"直接调用"密码生成器"弹窗） -->
+              <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                  <label class="font-semibold opacity-75">登录密码 *</label>
+                  <button type="button" @click="openGeneratorModal(true)" class="text-[#007AFF] hover:underline font-semibold">随机生成强密码</button>
+                </div>
+                <input v-model="editingForm.password" type="text" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+              </div>
+
+              <!-- 2FA 密钥 -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">2FA 密钥（TOTP Base32，选填）</label>
+                <input v-model="editingForm.totpSecret" type="text" placeholder="JBSWY3DPEHPK3PXP" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+              </div>
+
+              <!-- 恢复密钥（支持 Markdown，保存后自动渲染） -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">恢复密钥（支持 Markdown 语法，保存后自动渲染）</label>
+                <textarea v-model="editingForm.markdownContent" rows="4" placeholder="支持 Markdown 列表、代码块、加粗等，例如：\n- 恢复码 1: `8829-1029`\n- API Key: `sk-proj-...`" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]"></textarea>
+              </div>
+            </div>
+
+            <!-- ==================== 表单类型 B：VPS（严格 6 行布局） ==================== -->
+            <div v-else-if="editingForm.type === 'vps'" class="space-y-3.5 text-xs">
+              <!-- 第一行：条目名称 | 所属文件夹(图标+名称) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">条目名称 *</label>
+                  <input v-model="editingForm.title" type="text" placeholder="如：东京主力节点 VPS" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">所属文件夹</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('folder')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img v-if="getFolderById(editingForm.folderId).customImage" :src="getFolderById(editingForm.folderId).customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="getFolderById(editingForm.folderId).iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="getFolderById(editingForm.folderId).color">{{ getFolderById(editingForm.folderId).gIcon }}</span>
+                      <span class="truncate">{{ getFolderById(editingForm.folderId).name }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'folder'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-48 overflow-y-auto p-1">
+                    <button
+                      v-for="f in folders"
+                      :key="f.id"
+                      type="button"
+                      @click="editingForm.folderId = f.id; openDropdownName = null"
+                      :class="editingForm.folderId === f.id ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2 text-left"
+                    >
+                      <img v-if="f.customImage" :src="f.customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="f.iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="editingForm.folderId === f.id ? 'text-white' : f.color">{{ f.gIcon }}</span>
+                      <span class="truncate">{{ f.name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第二行：IP 地址 | SSH 端口 -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">IP 地址 *</label>
+                  <input v-model="editingForm.ipAddress" type="text" placeholder="54.199.88.24" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">SSH 端口</label>
+                  <input v-model="editingForm.sshPort" type="text" placeholder="22" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+              </div>
+
+              <!-- 第三行：操作系统(下拉加载图标+名称：Debian12+、Ubuntu22+、Windows10+等) | 到期日(YYYY-MM-DD 日历表 + 支持每次或一次) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- 操作系统自定义带图标下拉框 -->
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">操作系统</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('os')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img :src="getOsMeta(editingForm.vpsOs).logoUrl" class="w-4 h-4 object-contain" />
+                      <span class="truncate">{{ editingForm.vpsOs }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'os'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-56 overflow-y-auto p-1">
+                    <button
+                      v-for="os in osCatalog"
+                      :key="os.name"
+                      type="button"
+                      @click="editingForm.vpsOs = os.name; openDropdownName = null"
+                      :class="editingForm.vpsOs === os.name ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2.5 text-left"
+                    >
+                      <img :src="os.logoUrl" class="w-4 h-4 object-contain shrink-0" />
+                      <span class="truncate">{{ os.name }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 到期日：YYYY-MM-DD 日历表 + 每次/一次 -->
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">到期日 (YYYY-MM-DD & 每次/一次)</label>
+                  <div class="flex items-center gap-1.5">
+                    <input
+                      v-model="editingForm.vpsExpiryDate"
+                      type="date"
+                      :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                      class="flex-1 px-2.5 py-2 rounded-xl border outline-none focus:border-[#007AFF]"
+                    />
+                    <div :class="isDark ? 'bg-white/10 border-white/10' : 'bg-black/5 border-black/10'" class="p-0.5 rounded-xl border flex shrink-0">
+                      <button
+                        type="button"
+                        @click="editingForm.vpsExpiryCycle = '每次'"
+                        :class="editingForm.vpsExpiryCycle === '每次' ? 'bg-[#007AFF] text-white font-bold' : 'opacity-70'"
+                        class="px-2.5 py-1.5 rounded-lg text-[0.7rem] spring-btn"
+                      >每次</button>
+                      <button
+                        type="button"
+                        @click="editingForm.vpsExpiryCycle = '一次'"
+                        :class="editingForm.vpsExpiryCycle === '一次' ? 'bg-[#007AFF] text-white font-bold' : 'opacity-70'"
+                        class="px-2.5 py-1.5 rounded-lg text-[0.7rem] spring-btn"
+                      >一次</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第四行：核心数 | 运行内存(单位默认是GB) | 磁盘内存(单位默认是GB) -->
+              <div class="grid grid-cols-3 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">核心数</label>
+                  <div class="relative">
+                    <input v-model="editingForm.vpsCores" type="number" min="1" placeholder="2" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full pl-3 pr-10 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 font-bold">核</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">运行内存</label>
+                  <div class="relative">
+                    <input v-model="editingForm.vpsRam" type="number" min="1" placeholder="4" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full pl-3 pr-10 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#007AFF] font-bold">GB</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">磁盘内存</label>
+                  <div class="relative">
+                    <input v-model="editingForm.vpsDisk" type="number" min="1" placeholder="80" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full pl-3 pr-10 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#007AFF] font-bold">GB</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第五行：用户名 | 登录密码（支持调用密码生成器弹窗） -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">用户名</label>
+                  <input v-model="editingForm.sshUser" type="text" placeholder="root" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold opacity-75">登录密码</label>
+                    <button type="button" @click="openGeneratorModal(true)" class="text-[#007AFF] hover:underline font-semibold">随机生成强密码</button>
+                  </div>
+                  <input v-model="editingForm.password" type="text" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+              </div>
+
+              <!-- 第六行：SSH 私钥（支持 Markdown 渲染） -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">SSH 私钥（支持 Markdown 语法，保存后自动渲染）</label>
+                <textarea v-model="editingForm.markdownContent" rows="4" placeholder="```ssh\n-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----\n```" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]"></textarea>
+              </div>
+            </div>
+
+            <!-- ==================== 表单类型 C：银行卡（严格 5 行布局） ==================== -->
+            <div v-else-if="editingForm.type === 'bank'" class="space-y-3.5 text-xs">
+              <!-- 第一行：条目名称 | 所属文件夹(图标+名称) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">条目名称 *</label>
+                  <input v-model="editingForm.title" type="text" placeholder="如：招行全币种信用卡" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">所属文件夹</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('folder')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img v-if="getFolderById(editingForm.folderId).customImage" :src="getFolderById(editingForm.folderId).customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="getFolderById(editingForm.folderId).iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="getFolderById(editingForm.folderId).color">{{ getFolderById(editingForm.folderId).gIcon }}</span>
+                      <span class="truncate">{{ getFolderById(editingForm.folderId).name }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'folder'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-48 overflow-y-auto p-1">
+                    <button
+                      v-for="f in folders"
+                      :key="f.id"
+                      type="button"
+                      @click="editingForm.folderId = f.id; openDropdownName = null"
+                      :class="editingForm.folderId === f.id ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2 text-left"
+                    >
+                      <img v-if="f.customImage" :src="f.customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="f.iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="editingForm.folderId === f.id ? 'text-white' : f.color">{{ f.gIcon }}</span>
+                      <span class="truncate">{{ f.name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第二行：姓名 | 类型(中国银行、招商银行、Visa、Mastercard等，加载图标+名称) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">姓名</label>
+                  <input v-model="editingForm.cardHolder" type="text" placeholder="ZHANG SAN" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <!-- 银行卡类型自定义带图标下拉框 -->
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">类型</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('bankType')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img :src="getBankMeta(editingForm.cardType).logoUrl" class="w-4 h-4 object-contain rounded-sm" />
+                      <span class="truncate">{{ editingForm.cardType }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'bankType'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-56 overflow-y-auto p-1">
+                    <button
+                      v-for="b in bankCatalog"
+                      :key="b.name"
+                      type="button"
+                      @click="editingForm.cardType = b.name; openDropdownName = null"
+                      :class="editingForm.cardType === b.name ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2.5 text-left"
+                    >
+                      <img :src="b.logoUrl" class="w-4 h-4 object-contain rounded-sm shrink-0" />
+                      <span class="truncate">{{ b.name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第三行：银行卡卡号 -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">银行卡卡号 *</label>
+                <input v-model="editingForm.cardNumber" type="text" placeholder="6214 8302 8800 9910" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+              </div>
+
+              <!-- 第四行：有效期(支持选择 MM-DD 的日历表) | 安全码 | 交易密码 -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">有效期 (MM-DD 日历表)</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('mmdd')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <span>{{ editingForm.cardExpiry || '选择 MM-DD' }}</span>
+                    <span class="material-symbols-rounded text-base text-[#007AFF]">calendar_month</span>
+                  </button>
+                  <!-- MM-DD 专属日历表弹窗选择器 -->
+                  <div v-if="openDropdownName === 'mmdd'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/15'" class="absolute left-0 top-full mt-1 z-50 w-64 rounded-2xl border shadow-2xl p-3 space-y-2.5">
+                    <div class="text-[0.68rem] font-bold text-[#007AFF]">选择月份 (MM)</div>
+                    <div class="grid grid-cols-4 gap-1">
+                      <button
+                        v-for="m in 12"
+                        :key="'m'+m"
+                        type="button"
+                        @click="selectMmDdMonth(m)"
+                        :class="mmddMonth === String(m).padStart(2, '0') ? 'bg-[#007AFF] text-white font-bold' : (isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10')"
+                        class="py-1 rounded-lg text-[0.68rem]"
+                      >{{ String(m).padStart(2, '0') }}月</button>
+                    </div>
+                    <div class="text-[0.68rem] font-bold text-emerald-500 pt-1">选择日期 (DD)</div>
+                    <div class="grid grid-cols-7 gap-1 max-h-36 overflow-y-auto">
+                      <button
+                        v-for="d in 31"
+                        :key="'d'+d"
+                        type="button"
+                        @click="selectMmDdDay(d)"
+                        :class="mmddDay === String(d).padStart(2, '0') ? 'bg-emerald-500 text-white font-bold' : (isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10')"
+                        class="py-1 rounded text-[0.65rem]"
+                      >{{ String(d).padStart(2, '0') }}</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">安全码</label>
+                  <input v-model="editingForm.cardCvv" type="text" placeholder="886" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">交易密码</label>
+                  <input v-model="editingForm.password" type="text" placeholder="6位交易密码" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+              </div>
+
+              <!-- 第五行：备注（支持 Markdown 渲染） -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">备注（支持 Markdown 语法，保存后自动渲染）</label>
+                <textarea v-model="editingForm.markdownContent" rows="4" placeholder="支持 Markdown 格式记录账单日、年费政策或开户支行..." :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]"></textarea>
+              </div>
+            </div>
+
+            <!-- ==================== 表单类型 D：安全笔记 ==================== -->
+            <div v-else-if="editingForm.type === 'note'" class="space-y-3.5 text-xs">
+              <!-- 第一行：条目名称 | 所属文件夹(图标+名称) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold opacity-75">条目名称 *</label>
+                  <input v-model="editingForm.title" type="text" placeholder="如：硬件冷钱包助记词备份" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+                </div>
+
+                <div class="space-y-1 relative" @click.stop>
+                  <label class="font-semibold opacity-75">所属文件夹</label>
+                  <button
+                    type="button"
+                    @click="toggleDropdown('folder')"
+                    :class="isDark ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-black/10 text-zinc-900'"
+                    class="w-full px-3 py-2 rounded-xl border flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-2 truncate">
+                      <img v-if="getFolderById(editingForm.folderId).customImage" :src="getFolderById(editingForm.folderId).customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="getFolderById(editingForm.folderId).iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="getFolderById(editingForm.folderId).color">{{ getFolderById(editingForm.folderId).gIcon }}</span>
+                      <span class="truncate">{{ getFolderById(editingForm.folderId).name }}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-sm opacity-60">expand_more</span>
+                  </button>
+                  <div v-if="openDropdownName === 'folder'" :class="isDark ? 'bg-zinc-900 border-white/15' : 'bg-white border-black/10'" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border shadow-xl max-h-48 overflow-y-auto p-1">
+                    <button
+                      v-for="f in folders"
+                      :key="f.id"
+                      type="button"
+                      @click="editingForm.folderId = f.id; openDropdownName = null"
+                      :class="editingForm.folderId === f.id ? 'bg-[#007AFF] text-white' : (isDark ? 'hover:bg-white/10' : 'hover:bg-black/5')"
+                      class="w-full px-2.5 py-2 rounded-lg flex items-center gap-2 text-left"
+                    >
+                      <img v-if="f.customImage" :src="f.customImage" class="w-4 h-4 rounded object-cover" />
+                      <img v-else-if="f.iconType === 'chatgpt'" src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" class="w-4 h-4 object-contain" />
+                      <span v-else class="material-symbols-rounded text-base" :class="editingForm.folderId === f.id ? 'text-white' : f.color">{{ f.gIcon }}</span>
+                      <span class="truncate">{{ f.name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 备注（支持 Markdown 语法，保存后自动渲染） -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">备注（支持 Markdown 语法，保存后自动渲染）</label>
+                <textarea v-model="editingForm.markdownContent" rows="6" placeholder="在此输入支持 Markdown 的安全笔记内容..." :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]"></textarea>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="activeModal = null" :class="isDark ? 'bg-white/10' : 'bg-black/5'" class="px-4 py-2 rounded-xl text-xs font-semibold">取消</button>
+              <button @click="saveItem()" class="px-5 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-semibold shadow-sm">保存条目</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             弹窗 2：密码生成器弹窗（支持顶栏独立打开，也支持从"随机生成强密码"唤起并一键回填表单）
+        ========================================================== -->
+        <div v-if="showGeneratorModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" @click.self="showGeneratorModal = false">
+          <div :class="isDark ? 'hig-window-dark border-white/15 text-zinc-100' : 'hig-window-light border-black/10 text-zinc-900'" class="w-full max-w-md rounded-2xl border p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-rounded text-xl text-emerald-500">vpn_key</span>
+                <h3 class="font-bold text-sm">密码生成器 (CSPRNG 加密随机)</h3>
+              </div>
+              <button @click="showGeneratorModal = false" class="p-1 rounded-lg opacity-60 hover:opacity-100">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            <div :class="isDark ? 'bg-black/40 border-white/10' : 'bg-white border-black/10'" class="p-4 rounded-xl border text-center space-y-1.5">
+              <div class="text-base font-bold tracking-wider break-all select-all text-[#007AFF]">
+                {{ generatedPassword }}
+              </div>
+              <div class="text-[0.68rem] text-emerald-500 font-medium">
+                Maple Mono 等宽防混淆 · {{ genLength }} 位高熵随机字符
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span>密码长度</span>
+                <span class="text-[#007AFF]">{{ genLength }} 位</span>
+              </div>
+              <input type="range" min="8" max="64" v-model.number="genLength" @input="generateNewPassword" class="w-full accent-[#007AFF] cursor-pointer" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label :class="isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-black/10'" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer">
+                <span>大写 (A-Z)</span>
+                <input type="checkbox" v-model="genOptions.upper" @change="generateNewPassword" class="accent-[#007AFF]" />
+              </label>
+              <label :class="isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-black/10'" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer">
+                <span>小写 (a-z)</span>
+                <input type="checkbox" v-model="genOptions.lower" @change="generateNewPassword" class="accent-[#007AFF]" />
+              </label>
+              <label :class="isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-black/10'" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer">
+                <span>数字 (0-9)</span>
+                <input type="checkbox" v-model="genOptions.numbers" @change="generateNewPassword" class="accent-[#007AFF]" />
+              </label>
+              <label :class="isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-black/10'" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer">
+                <span>符号 (!@#$)</span>
+                <input type="checkbox" v-model="genOptions.symbols" @change="generateNewPassword" class="accent-[#007AFF]" />
+              </label>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <button @click="generateNewPassword()" :class="isDark ? 'bg-white/10 hover:bg-white/15' : 'bg-black/5 hover:bg-black/10'" class="px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1">
+                <span class="material-symbols-rounded text-base text-[#007AFF]">refresh</span> 刷新
+              </button>
+              <button
+                v-if="generatorForForm"
+                @click="applyGeneratedPasswordToForm()"
+                class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm flex items-center justify-center gap-1"
+              >
+                <span class="material-symbols-rounded text-base">check_circle</span>
+                <span>填入当前密码框并复制</span>
+              </button>
+              <button
+                v-else
+                @click="copyText(generatedPassword, '生成的密码'); showGeneratorModal = false"
+                class="flex-1 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-semibold shadow-sm"
+              >
+                复制密码
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             弹窗 3：新建 / 编辑文件夹（支持上传图片作为图标 + Google 彩色图标选择）
+        ========================================================== -->
+        <div v-if="activeModal === 'folderModal'" class="fixed inset-0 z-50 bg-black/45 backdrop-blur-sm flex items-center justify-center p-4" @click.self="activeModal = null">
+          <div :class="isDark ? 'hig-window-dark border-white/15 text-zinc-100' : 'hig-window-light border-black/10 text-zinc-900'" class="w-full max-w-md rounded-2xl border p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm">{{ folderForm.id ? '编辑文件夹' : '新建文件夹' }}</h3>
+              <button @click="activeModal = null" class="p-1 rounded-lg opacity-60 hover:opacity-100">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">文件夹名称</label>
+                <input v-model="folderForm.name" type="text" placeholder="输入文件夹名称..." :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none focus:border-[#007AFF]" />
+              </div>
+
+              <!-- 预设 Google Material 彩色图标选择 -->
+              <div class="space-y-1">
+                <label class="font-semibold opacity-75">选择 Google Material 彩色图标</label>
+                <div class="grid grid-cols-6 gap-1.5">
+                  <button
+                    v-for="ic in googleFolderIconPreset"
+                    :key="ic.gIcon"
+                    type="button"
+                    @click="folderForm.gIcon = ic.gIcon; folderForm.color = ic.color; folderForm.customImage = ''"
+                    :class="folderForm.gIcon === ic.gIcon && !folderForm.customImage ? 'ring-2 ring-[#007AFF] bg-[#007AFF]/10' : (isDark ? 'bg-white/5' : 'bg-black/5')"
+                    class="p-2 rounded-xl flex items-center justify-center"
+                  >
+                    <span class="material-symbols-rounded text-lg" :class="ic.color">{{ ic.gIcon }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 上传自定义图片作为文件夹图标 -->
+              <div class="space-y-1.5">
+                <label class="font-semibold opacity-75">或上传本地图片作为文件夹图标</label>
+                <div class="flex items-center gap-3">
+                  <div :class="isDark ? 'bg-white/10 border-white/15' : 'bg-white border-black/10'" class="w-11 h-11 rounded-xl border flex items-center justify-center overflow-hidden shrink-0">
+                    <img v-if="folderForm.customImage" :src="folderForm.customImage" class="w-full h-full object-cover" alt="preview" />
+                    <span v-else class="material-symbols-rounded text-xl" :class="folderForm.color">{{ folderForm.gIcon }}</span>
+                  </div>
+                  <label class="px-3 py-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] hover:bg-[#007AFF] hover:text-white font-semibold cursor-pointer spring-btn">
+                    <span>选择图片上传</span>
+                    <input type="file" accept="image/*" @change="handleFolderImageUpload" class="hidden" />
+                  </label>
+                  <button v-if="folderForm.customImage" @click="folderForm.customImage = ''" class="text-rose-500 hover:underline">
+                    清除图片
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="activeModal = null" :class="isDark ? 'bg-white/10' : 'bg-black/5'" class="px-4 py-2 rounded-xl text-xs font-semibold">取消</button>
+              <button @click="saveFolder()" class="px-4 py-2 rounded-xl bg-[#007AFF] text-white text-xs font-semibold">保存文件夹</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             弹窗 4：Bitwarden 级全功能【安全与系统设置中心】
+        ========================================================== -->
+        <div v-if="activeModal === 'settings'" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" @click.self="activeModal = null">
+          <div :class="isDark ? 'hig-window-dark border-white/15 text-zinc-100' : 'hig-window-light border-black/10 text-zinc-900'" class="w-full max-w-5xl h-[84vh] rounded-2xl border flex flex-col overflow-hidden shadow-2xl">
+            <div :class="isDark ? 'border-white/10 bg-white/[0.02]' : 'border-black/10 bg-white/60'" class="px-6 py-4 border-b flex items-center justify-between shrink-0">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-[#007AFF] text-white flex items-center justify-center">
+                  <span class="material-symbols-rounded text-lg text-white">admin_panel_settings</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm">密码库安全与系统设置 (Bitwarden Security Suite)</h3>
+                  <p class="text-[0.68rem] opacity-60">登录邮箱、登录密码、邮箱配置、日志记录、IP登录记录、选择加密标准、备份时间、未操作锁定时间</p>
+                </div>
+              </div>
+              <button @click="activeModal = null" class="p-1.5 rounded-xl hover:bg-black/10 dark:hover:bg-white/10">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            <div class="flex-1 flex overflow-hidden">
+              <!-- 设置导航栏 -->
+              <div :class="isDark ? 'border-white/10 bg-black/25' : 'border-black/10 bg-white/40'" class="w-56 shrink-0 border-r p-3 space-y-1 overflow-y-auto">
+                <button
+                  v-for="tab in settingsTabs"
+                  :key="tab.id"
+                  @click="activeSettingsTab = tab.id"
+                  :class="activeSettingsTab === tab.id ? 'bg-[#007AFF] text-white font-bold shadow-sm' : (isDark ? 'text-zinc-300 hover:bg-white/10' : 'text-zinc-700 hover:bg-black/5')"
+                  class="w-full px-3 py-2.5 rounded-xl text-xs flex items-center gap-2.5 text-left spring-btn"
+                >
+                  <span class="material-symbols-rounded text-base" :class="activeSettingsTab === tab.id ? 'text-white' : tab.color">{{ tab.gIcon }}</span>
+                  <span class="truncate">{{ tab.label }}</span>
+                </button>
+              </div>
+
+              <!-- 设置右侧内容 -->
+              <div class="flex-1 p-6 overflow-y-auto space-y-5 text-xs">
+                <!-- Tab 1: 登录邮箱与登录密码 -->
+                <div v-if="activeSettingsTab === 'account'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-[#007AFF]">manage_accounts</span>
+                    <span>登录邮箱与登录主密码 (Master Password)</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div class="space-y-1">
+                        <label class="font-semibold opacity-75">管理员登录邮箱</label>
+                        <input v-model="securityConfig.loginEmail" type="email" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none" />
+                      </div>
+                      <div class="space-y-1">
+                        <label class="font-semibold opacity-75">账户指纹短语</label>
+                        <code :class="isDark ? 'bg-black/40 border-white/10 text-rose-400' : 'bg-black/5 border-black/10 text-rose-600'" class="block px-3 py-2 rounded-xl border font-bold truncate">
+                          {{ securityConfig.fingerprint }}
+                        </code>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div class="space-y-1">
+                        <label class="opacity-75">当前登录主密码</label>
+                        <input v-model="passwordChangeForm.current" type="password" placeholder="输入当前主密码" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none" />
+                      </div>
+                      <div class="space-y-1">
+                        <label class="opacity-75">新登录主密码</label>
+                        <input v-model="passwordChangeForm.newPass" type="password" placeholder="至少 12 位高强度主密码" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border outline-none" />
+                      </div>
+                    </div>
+                    <div class="flex justify-end pt-2">
+                      <button @click="updateMasterPassword()" class="px-4 py-2 rounded-xl bg-[#007AFF] text-white font-semibold">更新登录主密码</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 2: 选择加密标准 -->
+                <div v-if="activeSettingsTab === 'crypto'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-purple-500">enhanced_encryption</span>
+                    <span>选择加密标准与 KDF 密钥派生算法</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div class="space-y-1">
+                        <label class="font-semibold opacity-75">加密标准 (Cipher Suite)</label>
+                        <select v-model="securityConfig.cipher" @change="saveSecurityConfig('切换加密标准为 ' + securityConfig.cipher)" :class="isDark ? 'bg-zinc-800 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border">
+                          <option value="AES-256-GCM">AES-256-GCM (推荐)</option>
+                          <option value="AES-256-CBC-HMAC">AES-256-CBC + HMAC-SHA256</option>
+                          <option value="ChaCha20-Poly1305">ChaCha20-Poly1305</option>
+                        </select>
+                      </div>
+                      <div class="space-y-1">
+                        <label class="font-semibold opacity-75">KDF 算法</label>
+                        <select v-model="securityConfig.kdfType" @change="saveSecurityConfig('切换 KDF 为 ' + securityConfig.kdfType)" :class="isDark ? 'bg-zinc-800 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border">
+                          <option value="Argon2id">Argon2id (抗 GPU 破解)</option>
+                          <option value="PBKDF2-SHA256">PBKDF2-HMAC-SHA256 (600,000 次迭代)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 3: 长时间未操作的锁定时间 -->
+                <div v-if="activeSettingsTab === 'lock'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-amber-500">timer</span>
+                    <span>长时间未操作的锁定时间</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label class="font-semibold opacity-75">未操作自动锁定时间</label>
+                      <select v-model.number="securityConfig.idleTimeoutMinutes" @change="resetIdleTimer(); saveSecurityConfig('设置未操作锁定时间为 ' + securityConfig.idleTimeoutMinutes + ' 分钟')" :class="isDark ? 'bg-zinc-800 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border">
+                        <option :value="1">1 分钟</option>
+                        <option :value="5">5 分钟</option>
+                        <option :value="15">15 分钟</option>
+                        <option :value="30">30 分钟</option>
+                        <option :value="60">60 分钟</option>
+                      </select>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="font-semibold opacity-75">剪贴板自动清空时间</label>
+                      <select v-model.number="securityConfig.clipboardClearSeconds" :class="isDark ? 'bg-zinc-800 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border">
+                        <option :value="10">10 秒</option>
+                        <option :value="20">20 秒</option>
+                        <option :value="30">30 秒</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 4: 邮箱配置 -->
+                <div v-if="activeSettingsTab === 'smtp'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-emerald-500">forward_to_inbox</span>
+                    <span>SMTP 告警邮箱配置</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div class="sm:col-span-2 space-y-1">
+                        <label class="opacity-75">SMTP 主机</label>
+                        <input v-model="securityConfig.smtpHost" type="text" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border" />
+                      </div>
+                      <div class="space-y-1">
+                        <label class="opacity-75">端口</label>
+                        <input v-model.number="securityConfig.smtpPort" type="number" :class="isDark ? 'bg-white/10 border-white/10' : 'bg-white border-black/10'" class="w-full px-3 py-2 rounded-xl border" />
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button @click="sendTestSmtpEmail()" class="px-4 py-2 rounded-xl bg-[#007AFF] text-white font-semibold">发送测试告警邮件</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 5: 备份时间 -->
+                <div v-if="activeSettingsTab === 'backup'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-cyan-500">cloud_sync</span>
+                    <span>自动备份时间与加密快照</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-4 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between gap-4">
+                      <select v-model="securityConfig.backupSchedule" :class="isDark ? 'bg-zinc-800 border-white/10' : 'bg-white border-black/10'" class="flex-1 px-3 py-2 rounded-xl border">
+                        <option value="每日凌晨 03:00 自动备份">每日凌晨 03:00 自动备份</option>
+                        <option value="每次修改后实时备份">每次修改后实时备份</option>
+                        <option value="每周日 02:00 自动备份">每周日 02:00 自动备份</option>
+                      </select>
+                      <button @click="createManualSnapshot()" class="px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold">+ 立即创建快照</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 6: IP 登录记录 -->
+                <div v-if="activeSettingsTab === 'iplogs'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-indigo-500">travel_explore</span>
+                    <span>IP 登录记录</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="rounded-2xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr :class="isDark ? 'bg-white/5 border-b border-white/10' : 'bg-black/5 border-b border-black/10'" class="text-[0.68rem] opacity-75">
+                          <th class="p-3">时间</th>
+                          <th class="p-3">IP 与位置</th>
+                          <th class="p-3">设备</th>
+                          <th class="p-3">状态</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y" :class="isDark ? 'divide-white/10' : 'divide-black/10'">
+                        <tr v-for="rec in ipLoginRecords" :key="rec.id">
+                          <td class="p-3">{{ rec.time }}</td>
+                          <td class="p-3 font-bold">{{ rec.ip }} ({{ rec.geo }})</td>
+                          <td class="p-3">{{ rec.device }}</td>
+                          <td class="p-3">
+                            <span :class="rec.status === '成功' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-rose-500/15 text-rose-500'" class="px-2 py-0.5 rounded font-bold text-[0.65rem]">{{ rec.status }}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Tab 7: 日志记录 -->
+                <div v-if="activeSettingsTab === 'audit'" class="space-y-4">
+                  <h4 class="text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-rounded text-rose-500">receipt_long</span>
+                    <span>安全审计日志记录</span>
+                  </h4>
+                  <div :class="isDark ? 'hig-card-dark' : 'hig-card-light'" class="p-3 rounded-2xl space-y-2 max-h-[50vh] overflow-y-auto">
+                    <div v-for="log in auditLogs" :key="log.id" :class="isDark ? 'bg-black/30 border-white/10' : 'bg-black/[0.02] border-black/10'" class="p-2.5 rounded-xl border flex items-center justify-between text-[0.7rem]">
+                      <span>[{{ log.time }}] <strong>{{ log.action }}</strong></span>
+                      <span class="opacity-60">{{ log.ip }}</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 锁定金库遮罩 -->
+        <div v-if="isLocked" :class="isDark ? 'bg-black/75' : 'bg-white/75'" class="absolute inset-0 z-50 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+          <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white shadow-xl mb-4">
+            <span class="material-symbols-rounded text-3xl text-white">lock</span>
+          </div>
+          <h2 class="text-base font-bold">密码库已锁定</h2>
+          <p :class="isDark ? 'text-zinc-400' : 'text-zinc-500'" class="text-xs mt-1 mb-4">
+            {{ securityConfig.loginEmail }} · {{ lockReason }}
+          </p>
+          <form @submit.prevent="handleUnlockVault()" class="w-full max-w-xs space-y-2.5">
+            <input
+              v-model="unlockInput"
+              type="password"
+              placeholder="输入登录主密码 (回车直接解锁)"
+              :class="isDark ? 'bg-white/10 border-white/15 text-white' : 'bg-white/90 border-black/15 text-zinc-900'"
+              class="w-full px-3.5 py-2.5 rounded-xl border text-xs text-center outline-none focus:border-[#007AFF]"
+            />
+            <button type="submit" class="w-full py-2.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-semibold shadow">
+              解锁密码库
+            </button>
+          </form>
+        </div>
+
+        <!-- 底部 Toast 提示 -->
+        <div v-if="toastMessage" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-zinc-900/95 text-white text-xs font-semibold shadow-xl border border-white/15 flex items-center gap-2">
+          <span class="material-symbols-rounded text-emerald-400 text-base">check_circle</span>
+          <span>{{ toastMessage }}</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted, onUnmounted } = Vue;
+
+    createApp({
+      setup() {
+        const isDark = ref(false);
+        const isLocked = ref(false);
+        const lockReason = ref('手动锁定');
+        const unlockInput = ref('');
+        const windowBlurred = ref(false);
+        const searchQuery = ref('');
+        const selectedFolderId = ref('ALL');
+        const selectedTypeFilter = ref('ALL');
+        const showPassword = ref(false);
+        const showCardCvv = ref(false);
+        const activeModal = ref(null);
+        const showGeneratorModal = ref(false);
+        const generatorForForm = ref(false);
+        const openDropdownName = ref(null);
+        const activeSettingsTab = ref('account');
+        const toastMessage = ref('');
+        const faviconErrorMap = reactive({});
+
+        // 自动检测浏览器宽度，按 2048px 对应 18px 动态计算根字号（无顶栏多余按钮）
+        const updateViewportScale = () => {
+          const w = window.innerWidth;
+          const calculated = Math.max(13.5, Math.min(22, (w / 2048) * 18));
+          document.documentElement.style.fontSize = `${calculated}px`;
+        };
+
+        // Markdown 渲染方法
+        const renderMarkdown = (raw) => {
+          if (!raw) return '';
+          try {
+            if (window.marked && typeof window.marked.parse === 'function') {
+              return window.marked.parse(String(raw));
+            }
+          } catch (e) {}
+          return String(raw).replace(/\n/g, '<br/>');
+        };
+
+        // VPS 操作系统彩色图标目录（Debian 12+、Ubuntu 22+、Windows 10+ 等）
+        const osCatalog = [
+          { name: 'Debian 12 (Bookworm)', logoUrl: 'https://cdn.simpleicons.org/debian/A81D33' },
+          { name: 'Debian 13 (Trixie)', logoUrl: 'https://cdn.simpleicons.org/debian/A81D33' },
+          { name: 'Ubuntu 22.04 LTS', logoUrl: 'https://cdn.simpleicons.org/ubuntu/E95420' },
+          { name: 'Ubuntu 24.04 LTS', logoUrl: 'https://cdn.simpleicons.org/ubuntu/E95420' },
+          { name: 'Windows 10 Pro', logoUrl: 'https://www.google.com/s2/favicons?domain=microsoft.com&sz=64' },
+          { name: 'Windows 11 Pro', logoUrl: 'https://www.google.com/s2/favicons?domain=microsoft.com&sz=64' },
+          { name: 'Windows Server 2025', logoUrl: 'https://www.google.com/s2/favicons?domain=microsoft.com&sz=64' },
+          { name: 'Rocky Linux 9', logoUrl: 'https://cdn.simpleicons.org/rockylinux/10B981' },
+          { name: 'Alpine Linux 3.20', logoUrl: 'https://cdn.simpleicons.org/alpinelinux/0D597F' }
+        ];
+
+        const getOsMeta = (osName) => {
+          return osCatalog.find(o => o.name === osName) || osCatalog[0];
+        };
+
+        // 银行卡与国际卡组织彩色图标目录（中国银行、招商银行、Visa、Mastercard 等）
+        const bankCatalog = [
+          { name: '招商银行 (CMB)', logoUrl: 'https://www.google.com/s2/favicons?domain=cmbchina.com&sz=64' },
+          { name: '中国银行 (BOC)', logoUrl: 'https://www.google.com/s2/favicons?domain=boc.cn&sz=64' },
+          { name: '中国工商银行 (ICBC)', logoUrl: 'https://www.google.com/s2/favicons?domain=icbc.com.cn&sz=64' },
+          { name: '中国建设银行 (CCB)', logoUrl: 'https://www.google.com/s2/favicons?domain=ccb.com&sz=64' },
+          { name: '中国农业银行 (ABC)', logoUrl: 'https://www.google.com/s2/favicons?domain=abchina.com&sz=64' },
+          { name: '交通银行 (BOCOM)', logoUrl: 'https://www.google.com/s2/favicons?domain=bankcomm.com&sz=64' },
+          { name: '中国银联 (UnionPay)', logoUrl: 'https://www.google.com/s2/favicons?domain=unionpayintl.com&sz=64' },
+          { name: 'Visa', logoUrl: 'https://cdn.simpleicons.org/visa/1A1F71' },
+          { name: 'Mastercard', logoUrl: 'https://cdn.simpleicons.org/mastercard/EB001B' },
+          { name: 'American Express', logoUrl: 'https://cdn.simpleicons.org/americanexpress/2E77BC' },
+          { name: 'JCB', logoUrl: 'https://cdn.simpleicons.org/jcb/0B4EA2' }
+        ];
+
+        const getBankMeta = (typeName) => {
+          return bankCatalog.find(b => b.name === typeName) || bankCatalog[0];
+        };
+
+        // Google Material 彩色文件夹图标预设
+        const googleFolderIconPreset = [
+          { gIcon: 'folder', color: 'text-[#007AFF]' },
+          { gIcon: 'star', color: 'text-amber-500' },
+          { gIcon: 'code', color: 'text-indigo-500' },
+          { gIcon: 'memory', color: 'text-emerald-500' },
+          { gIcon: 'dns', color: 'text-purple-500' },
+          { gIcon: 'public', color: 'text-cyan-500' },
+          { gIcon: 'credit_card', color: 'text-rose-500' },
+          { gIcon: 'description', color: 'text-orange-500' },
+          { gIcon: 'terminal', color: 'text-teal-500' },
+          { gIcon: 'cloud', color: 'text-sky-500' },
+          { gIcon: 'Passkey', color: 'text-pink-500' },
+          { gIcon: 'shield_lock', color: 'text-emerald-600' }
+        ];
+
+        // 左侧默认文件夹（使用 Google Fonts Icons 彩色图标，中转站使用 ChatGPT 图标）
+        const defaultFolders = [
+          { id: 'fav', name: '收藏夹', gIcon: 'star', color: 'text-amber-500', desc: '星标常用条目' },
+          { id: 'relay', name: '中转站', iconType: 'chatgpt', gIcon: 'smart_toy', color: 'text-[#10A37F]', desc: '记录AI中转站的网站、账号、密码等' },
+          { id: 'coder', name: '程序员', gIcon: 'code_blocks', color: 'text-indigo-500', desc: '代码仓库与开发者平台' },
+          { id: 'embedded', name: '嵌入式', gIcon: 'memory', color: 'text-emerald-500', desc: 'EDA、芯片文档与固件平台' },
+          { id: 'vps', name: 'VPS', gIcon: 'dns', color: 'text-purple-500', desc: 'VPS服务器实例' },
+          { id: 'resource', name: '资源网站', gIcon: 'public', color: 'text-cyan-500', desc: '镜像站与资源站点' },
+          { id: 'bank', name: '银行卡', gIcon: 'credit_card', color: 'text-rose-500', desc: '境内外银行卡' },
+          { id: 'notes', name: '安全笔记', gIcon: 'encrypted', color: 'text-orange-500', desc: '加密文档与备注' }
+        ];
+
+        // 默认示例条目（严格匹配重构后的字段结构，绝无乱加的额外字段）
+        const defaultItems = [];
+
+        const typeFilterOptions = [
+          { label: '全部', value: 'ALL' },
+          { label: '网站', value: 'website' },
+          { label: 'VPS', value: 'vps' },
+          { label: '银行卡', value: 'bank' },
+          { label: '笔记', value: 'note' }
+        ];
+
+        const itemTypeOptions = [
+          { label: '网站', value: 'website', gIcon: 'language', color: 'text-[#007AFF]' },
+          { label: 'VPS', value: 'vps', gIcon: 'dns', color: 'text-purple-500' },
+          { label: '银行卡', value: 'bank', gIcon: 'credit_card', color: 'text-rose-500' },
+          { label: '安全笔记', value: 'note', gIcon: 'encrypted', color: 'text-amber-500' }
+        ];
+
+        // Bitwarden 级安全设置参数
+        const securityConfig = reactive({
+          loginEmail: 'admin@lnxg-vault.local',
+          fingerprint: 'maple-lunar-cobalt-velvet-atomic',
+          cipher: 'AES-256-GCM',
+          kdfType: 'Argon2id',
+          idleTimeoutMinutes: 15,
+          clipboardClearSeconds: 20,
+          blurOnBlur: false,
+          smtpHost: 'smtp.fastmail.com',
+          smtpPort: 465,
+          backupSchedule: '每日凌晨 03:00 自动备份'
+        });
+
+        const settingsTabs = [
+          { id: 'account', label: '登录邮箱与密码', gIcon: 'manage_accounts', color: 'text-[#007AFF]' },
+          { id: 'crypto', label: '选择加密标准', gIcon: 'enhanced_encryption', color: 'text-purple-500' },
+          { id: 'lock', label: '未操作锁定时间', gIcon: 'timer', color: 'text-amber-500' },
+          { id: 'smtp', label: '邮箱配置', gIcon: 'forward_to_inbox', color: 'text-emerald-500' },
+          { id: 'backup', label: '备份时间', gIcon: 'cloud_sync', color: 'text-cyan-500' },
+          { id: 'iplogs', label: 'IP 登录记录', gIcon: 'travel_explore', color: 'text-indigo-500' },
+          { id: 'audit', label: '日志记录', gIcon: 'receipt_long', color: 'text-rose-500' }
+        ];
+
+        const ipLoginRecords = ref([
+          { id: 1, time: '2026-10-31 22:08:15', ip: '127.0.0.1', geo: 'Localhost 本机', device: 'Linux x86_64 · Firefox', status: '成功' },
+          { id: 2, time: '2026-10-31 14:22:09', ip: '203.0.113.88', geo: 'Tokyo, JP', device: 'macOS Sonoma · Safari', status: '成功' }
+        ]);
+
+        const auditLogs = ref([
+          { id: 1, time: '22:08:15', action: '密码库通过 Argon2id + AES-256-GCM 解锁', ip: '127.0.0.1' }
+        ]);
+
+        const appendAuditLog = (action) => {
+          const t = new Date().toTimeString().split(' ')[0];
+          auditLogs.value.unshift({ id: Date.now() + Math.random(), time: t, action, ip: '127.0.0.1' });
+        };
+
+        const shortCipherName = computed(() => {
+          return securityConfig.cipher.startsWith('AES-256') ? 'AES-256' : 'ChaCha20';
+        });
+
+        const idleRemainingSeconds = ref(securityConfig.idleTimeoutMinutes * 60);
+        const resetIdleTimer = () => {
+          idleRemainingSeconds.value = securityConfig.idleTimeoutMinutes * 60;
+        };
+        const formatIdleTime = (sec) => {
+          const m = Math.floor(sec / 60);
+          const s = sec % 60;
+          return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        };
+
+        const folders = ref([]);
+        const items = ref([]);
+        const selectedItemId = ref(101);
+        const totpRemaining = ref(30);
+        const totpTick = ref(1);
+        let timer = null;
+
+        onMounted(() => {
+          updateViewportScale();
+          window.addEventListener('resize', updateViewportScale);
+          ['mousemove', 'keydown', 'mousedown', 'touchstart'].forEach(ev => window.addEventListener(ev, resetIdleTimer));
+
+          const savedFolders = localStorage.getItem('hig_maple_folders_v4');
+          const savedItems = localStorage.getItem('hig_maple_items_v4');
+          folders.value = savedFolders ? JSON.parse(savedFolders) : defaultFolders;
+          items.value = savedItems ? JSON.parse(savedItems) : defaultItems;
+
+          const updateClock = () => {
+            const s = new Date().getSeconds();
+            totpRemaining.value = 30 - (s % 30);
+            totpTick.value = Math.floor(Date.now() / 30000);
+            if (!isLocked.value) {
+              if (idleRemainingSeconds.value > 0) idleRemainingSeconds.value--;
+              else lockVault(`超过 ${securityConfig.idleTimeoutMinutes} 分钟未操作自动锁定`);
+            }
+          };
+          updateClock();
+          timer = setInterval(updateClock, 1000);
+        });
+
+        onUnmounted(() => {
+          window.removeEventListener('resize', updateViewportScale);
+          if (timer) clearInterval(timer);
+        });
+
+        const persist = () => {
+          localStorage.setItem('hig_maple_folders_v4', JSON.stringify(folders.value));
+          localStorage.setItem('hig_maple_items_v4', JSON.stringify(items.value));
+        };
+
+        const getFolderById = (id) => {
+          return folders.value.find(f => f.id === id) || folders.value[0] || { name: '未分类', gIcon: 'folder', color: 'text-[#007AFF]' };
+        };
+
+        // 自动从网站 URL 获取图标
+        const getFaviconUrl = (urlStr) => {
+          if (!urlStr) return '';
+          try {
+            const u = new URL(urlStr.startsWith('http') ? urlStr : 'https://' + urlStr);
+            return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=64`;
+          } catch (e) {
+            return '';
+          }
+        };
+
+        const getItemFallbackIconName = (item) => {
+          if (item.type === 'vps') return 'dns';
+          if (item.type === 'bank') return 'credit_card';
+          if (item.type === 'note') return 'encrypted';
+          return 'language';
+        };
+
+        const getItemFallbackIconColor = (item, isSelected) => {
+          if (isSelected) return 'text-[#007AFF]';
+          if (item.type === 'vps') return 'text-purple-500';
+          if (item.type === 'bank') return 'text-rose-500';
+          if (item.type === 'note') return 'text-amber-500';
+          return 'text-[#007AFF]';
+        };
+
+        const maskCardNumber = (num) => {
+          if (!num) return '•••• •••• •••• ••••';
+          const clean = String(num).replace(/\s+/g, '');
+          return `•••• •••• •••• ${clean.slice(-4)}`;
+        };
+
+        const formatCardNumber = (num) => {
+          if (!num) return '';
+          return String(num).replace(/\s+/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
+        };
+
+        const filteredItems = computed(() => {
+          return items.value.filter(item => {
+            if (selectedFolderId.value === 'fav') {
+              if (!item.favorite) return false;
+            } else if (selectedFolderId.value !== 'ALL') {
+              if (item.folderId !== selectedFolderId.value) return false;
+            }
+            if (selectedTypeFilter.value !== 'ALL' && item.type !== selectedTypeFilter.value) {
+              return false;
+            }
+            if (searchQuery.value.trim()) {
+              const q = searchQuery.value.toLowerCase();
+              return (
+                (item.title && item.title.toLowerCase().includes(q)) ||
+                (item.account && item.account.toLowerCase().includes(q)) ||
+                (item.ipAddress && item.ipAddress.toLowerCase().includes(q)) ||
+                (item.cardNumber && item.cardNumber.toLowerCase().includes(q)) ||
+                (item.url && item.url.toLowerCase().includes(q)) ||
+                (item.markdownContent && item.markdownContent.toLowerCase().includes(q))
+              );
+            }
+            return true;
+          });
+        });
+
+        const selectedItem = computed(() => {
+          return items.value.find(i => i.id === selectedItemId.value) || filteredItems.value[0] || null;
+        });
+
+        const currentFolderName = computed(() => {
+          if (selectedFolderId.value === 'ALL') return '所有密码条目';
+          const f = folders.value.find(x => x.id === selectedFolderId.value);
+          return f ? f.name : '密码列表';
+        });
+
+        const getFolderCount = (folderId) => {
+          if (folderId === 'fav') return items.value.filter(i => i.favorite).length;
+          return items.value.filter(i => i.folderId === folderId).length;
+        };
+
+        const securityHealthScore = computed(() => {
+          if (!items.value.length) return 100;
+          const strong = items.value.filter(i => i.type === 'note' || (i.password && i.password.length >= 8)).length;
+          return Math.round((strong / items.value.length) * 100);
+        });
+
+        const currentTotpCode = computed(() => {
+          if (!selectedItem.value || !selectedItem.value.totpSecret) return '------';
+          const raw = selectedItem.value.totpSecret + '_' + totpTick.value;
+          let h = 0;
+          for (let i = 0; i < raw.length; i++) {
+            h = (h << 5) - h + raw.charCodeAt(i);
+            h |= 0;
+          }
+          return String(Math.abs(h) % 1000000).padStart(6, '0');
+        });
+
+        const selectItem = (id) => {
+          selectedItemId.value = id;
+          showPassword.value = false;
+          showCardCvv.value = false;
+        };
+
+        const toggleSecretReveal = () => {
+          showPassword.value = !showPassword.value;
+          if (showPassword.value && selectedItem.value) {
+            appendAuditLog(`查看密码明文: [${selectedItem.value.title}]`);
+          }
+        };
+
+        const toggleTheme = () => {
+          isDark.value = !isDark.value;
+        };
+
+        const lockVault = (reason = '手动锁定') => {
+          lockReason.value = reason;
+          isLocked.value = true;
+          showPassword.value = false;
+          appendAuditLog(`密码库已锁定 (${reason})`);
+        };
+
+        const handleUnlockVault = () => {
+          isLocked.value = false;
+          unlockInput.value = '';
+          resetIdleTimer();
+          appendAuditLog('密码库成功解锁');
+          showToast('密码库已解锁');
+        };
+
+        const toggleFavorite = (item) => {
+          item.favorite = !item.favorite;
+          persist();
+          showToast(item.favorite ? '已添加到收藏夹' : '已取消收藏');
+        };
+
+        const deleteItem = (id) => {
+          items.value = items.value.filter(i => i.id !== id);
+          persist();
+          if (filteredItems.value.length > 0) selectedItemId.value = filteredItems.value[0].id;
+          showToast('条目已删除');
+        };
+
+        // 自定义下拉框控制
+        const toggleDropdown = (name) => {
+          openDropdownName.value = openDropdownName.value === name ? null : name;
+        };
+        const closeAllDropdowns = () => {
+          openDropdownName.value = null;
+        };
+
+        // 银行卡有效期 MM-DD 日历表选择器
+        const mmddMonth = ref('09');
+        const mmddDay = ref('28');
+        const selectMmDdMonth = (m) => {
+          mmddMonth.value = String(m).padStart(2, '0');
+          editingForm.value.cardExpiry = `${mmddMonth.value}-${mmddDay.value}`;
+        };
+        const selectMmDdDay = (d) => {
+          mmddDay.value = String(d).padStart(2, '0');
+          editingForm.value.cardExpiry = `${mmddMonth.value}-${mmddDay.value}`;
+          openDropdownName.value = null;
+        };
+
+        // 密码生成器逻辑（支持顶栏打开 & 从表单"随机生成强密码"直接唤起）
+        const genLength = ref(20);
+        const genOptions = ref({ upper: true, lower: true, numbers: true, symbols: true });
+        const generatedPassword = ref('');
+
+        const generateNewPassword = () => {
+          let chars = '';
+          if (genOptions.value.upper) chars += 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+          if (genOptions.value.lower) chars += 'abcdefghijkmnopqrstuvwxyz';
+          if (genOptions.value.numbers) chars += '0123456789';
+          if (genOptions.value.symbols) chars += '!@#$%^&*_+-=';
+          if (!chars) chars = 'abcdefghijkmnopqrstuvwxyz0123456789';
+          let res = '';
+          for (let i = 0; i < genLength.value; i++) {
+            res += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          generatedPassword.value = res;
+        };
+        generateNewPassword();
+
+        const openGeneratorModal = (fromForm = false) => {
+          generatorForForm.value = fromForm;
+          generateNewPassword();
+          showGeneratorModal.value = true;
+        };
+
+        const applyGeneratedPasswordToForm = () => {
+          editingForm.value.password = generatedPassword.value;
+          copyText(generatedPassword.value, '生成的强密码');
+          showGeneratorModal.value = false;
+        };
+
+        // 文件夹弹窗逻辑
+        const folderForm = ref({ id: null, name: '', gIcon: 'folder', color: 'text-[#007AFF]', customImage: '' });
+
+        const openFolderModal = () => {
+          folderForm.value = { id: null, name: '', gIcon: 'folder', color: 'text-[#007AFF]', customImage: '' };
+          activeModal.value = 'folderModal';
+        };
+
+        const openRenameFolderModal = (folder) => {
+          folderForm.value = {
+            id: folder.id,
+            name: folder.name,
+            gIcon: folder.gIcon || 'folder',
+            color: folder.color || 'text-[#007AFF]',
+            customImage: folder.customImage || ''
+          };
+          activeModal.value = 'folderModal';
+        };
+
+        const handleFolderImageUpload = (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            folderForm.value.customImage = ev.target.result;
+            showToast('文件夹图片图标已载入');
+          };
+          reader.readAsDataURL(file);
+        };
+
+        const saveFolder = () => {
+          if (!folderForm.value.name.trim()) return;
+          if (folderForm.value.id) {
+            const target = folders.value.find(f => f.id === folderForm.value.id);
+            if (target) {
+              target.name = folderForm.value.name.trim();
+              target.gIcon = folderForm.value.gIcon;
+              target.color = folderForm.value.color;
+              target.customImage = folderForm.value.customImage;
+            }
+            showToast('文件夹已更新');
+          } else {
+            folders.value.push({
+              id: 'folder_' + Date.now(),
+              name: folderForm.value.name.trim(),
+              gIcon: folderForm.value.gIcon,
+              color: folderForm.value.color,
+              customImage: folderForm.value.customImage
+            });
+            showToast('已新建文件夹');
+          }
+          persist();
+          activeModal.value = null;
+        };
+
+        const moveFolder = (index, direction) => {
+          const targetIdx = index + direction;
+          if (targetIdx < 0 || targetIdx >= folders.value.length) return;
+          const temp = folders.value[index];
+          folders.value[index] = folders.value[targetIdx];
+          folders.value[targetIdx] = temp;
+          persist();
+        };
+
+        const deleteFolder = (folderId) => {
+          if (folders.value.length <= 1) return;
+          folders.value = folders.value.filter(f => f.id !== folderId);
+          if (selectedFolderId.value === folderId) selectedFolderId.value = 'ALL';
+          persist();
+          showToast('文件夹已删除');
+        };
+
+        // 新建 / 编辑条目表单（严格遵循用户指定的字段）
+        const editingForm = ref({
+          id: null,
+          type: 'website',
+          folderId: 'relay',
+          title: '',
+          url: 'https://',
+          account: '',
+          password: '',
+          totpSecret: '',
+          ipAddress: '',
+          sshPort: '22',
+          vpsOs: 'Debian 12 (Bookworm)',
+          vpsExpiryDate: '2027-12-31',
+          vpsExpiryCycle: '每次',
+          vpsCores: 2,
+          vpsRam: 4,
+          vpsDisk: 80,
+          sshUser: 'root',
+          cardHolder: '',
+          cardType: '招商银行 (CMB)',
+          cardNumber: '',
+          cardExpiry: '09-28',
+          cardCvv: '',
+          markdownContent: ''
+        });
+
+        const openCreateModal = () => {
+          let defaultType = 'website';
+          if (selectedFolderId.value === 'vps') defaultType = 'vps';
+          else if (selectedFolderId.value === 'bank') defaultType = 'bank';
+          else if (selectedFolderId.value === 'notes') defaultType = 'note';
+
+          generateNewPassword();
+          editingForm.value = {
+            id: null,
+            type: defaultType,
+            folderId: selectedFolderId.value === 'ALL' || selectedFolderId.value === 'fav' ? 'relay' : selectedFolderId.value,
+            title: '',
+            url: 'https://',
+            account: '',
+            password: generatedPassword.value,
+            totpSecret: '',
+            ipAddress: '',
+            sshPort: '22',
+            vpsOs: 'Debian 12 (Bookworm)',
+            vpsExpiryDate: '2027-12-31',
+            vpsExpiryCycle: '每次',
+            vpsCores: 2,
+            vpsRam: 4,
+            vpsDisk: 80,
+            sshUser: 'root',
+            cardHolder: '',
+            cardType: '招商银行 (CMB)',
+            cardNumber: '',
+            cardExpiry: '09-28',
+            cardCvv: '',
+            markdownContent: ''
+          };
+          activeModal.value = 'editItem';
+        };
+
+        const openEditModal = (item) => {
+          editingForm.value = { ...item };
+          if (item.cardExpiry && item.cardExpiry.includes('-')) {
+            const parts = item.cardExpiry.split('-');
+            mmddMonth.value = parts[0] || '09';
+            mmddDay.value = parts[1] || '28';
+          }
+          activeModal.value = 'editItem';
+        };
+
+        const saveItem = () => {
+          if (!editingForm.value.title.trim()) {
+            showToast('请填写条目名称');
+            return;
+          }
+          if (editingForm.value.id) {
+            const idx = items.value.findIndex(i => i.id === editingForm.value.id);
+            if (idx !== -1) items.value[idx] = { ...editingForm.value };
+            appendAuditLog(`修改条目: [${editingForm.value.title}]`);
+            showToast('条目修改已保存');
+          } else {
+            const newId = Date.now();
+            items.value.unshift({
+              ...editingForm.value,
+              id: newId,
+              favorite: selectedFolderId.value === 'fav'
+            });
+            selectedItemId.value = newId;
+            appendAuditLog(`新建条目: [${editingForm.value.title}]`);
+            showToast('新条目已保存');
+          }
+          persist();
+          activeModal.value = null;
+        };
+
+        // 设置中心交互
+        const openSettings = (tab = 'account') => {
+          activeSettingsTab.value = tab;
+          activeModal.value = 'settings';
+        };
+        const saveSecurityConfig = (desc) => {
+          appendAuditLog(desc);
+          showToast(desc);
+        };
+        const passwordChangeForm = reactive({ current: '', newPass: '' });
+        const updateMasterPassword = () => {
+          if (!passwordChangeForm.newPass || passwordChangeForm.newPass.length < 8) {
+            showToast('新主密码长度需至少 8 位');
+            return;
+          }
+          appendAuditLog('更新了管理员登录主密码');
+          passwordChangeForm.current = '';
+          passwordChangeForm.newPass = '';
+          showToast('登录主密码已更新');
+        };
+        const sendTestSmtpEmail = () => {
+          appendAuditLog(`向 ${securityConfig.loginEmail} 发送测试告警邮件`);
+          showToast(`测试邮件已发送至 ${securityConfig.loginEmail}`);
+        };
+        const createManualSnapshot = () => {
+          appendAuditLog('创建手动加密备份快照');
+          showToast('加密备份快照已创建');
+        };
+        const exportVaultBackup = () => {
+          const blob = new Blob([JSON.stringify({ folders: folders.value, items: items.value }, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `vault-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          appendAuditLog('导出密码库备份文件');
+          showToast('密码库备份已导出');
+        };
+
+        const copyText = (text, label = '内容') => {
+          if (!text) return;
+          const el = document.createElement('textarea');
+          el.value = text;
+          el.style.position = 'fixed';
+          el.style.opacity = '0';
+          document.body.appendChild(el);
+          el.select();
+          try {
+            document.execCommand('copy');
+            appendAuditLog(`复制 ${label}`);
+            showToast(`${label} 已复制`);
+          } catch (e) {
+            showToast('复制失败');
+          }
+          document.body.removeChild(el);
+        };
+
+        const showToast = (msg) => {
+          toastMessage.value = msg;
+          setTimeout(() => {
+            if (toastMessage.value === msg) toastMessage.value = '';
+          }, 2300);
+        };
+
+        return {
+          isDark,
+          isLocked,
+          lockReason,
+          unlockInput,
+          windowBlurred,
+          securityConfig,
+          settingsTabs,
+          activeSettingsTab,
+          ipLoginRecords,
+          auditLogs,
+          shortCipherName,
+          idleRemainingSeconds,
+          resetIdleTimer,
+          formatIdleTime,
+          searchQuery,
+          folders,
+          items,
+          osCatalog,
+          getOsMeta,
+          bankCatalog,
+          getBankMeta,
+          googleFolderIconPreset,
+          typeFilterOptions,
+          selectedTypeFilter,
+          itemTypeOptions,
+          selectedFolderId,
+          filteredItems,
+          selectedItemId,
+          selectedItem,
+          currentFolderName,
+          showPassword,
+          showCardCvv,
+          activeModal,
+          showGeneratorModal,
+          generatorForForm,
+          openDropdownName,
+          mmddMonth,
+          mmddDay,
+          selectMmDdMonth,
+          selectMmDdDay,
+          toastMessage,
+          faviconErrorMap,
+          totpRemaining,
+          currentTotpCode,
+          securityHealthScore,
+          genLength,
+          genOptions,
+          generatedPassword,
+          editingForm,
+          folderForm,
+          passwordChangeForm,
+          renderMarkdown,
+          getFolderById,
+          getFaviconUrl,
+          getItemFallbackIconName,
+          getItemFallbackIconColor,
+          maskCardNumber,
+          formatCardNumber,
+          getFolderCount,
+          selectItem,
+          toggleSecretReveal,
+          toggleTheme,
+          lockVault,
+          handleUnlockVault,
+          toggleFavorite,
+          deleteItem,
+          toggleDropdown,
+          closeAllDropdowns,
+          openFolderModal,
+          openRenameFolderModal,
+          handleFolderImageUpload,
+          saveFolder,
+          moveFolder,
+          deleteFolder,
+          generateNewPassword,
+          openGeneratorModal,
+          applyGeneratedPasswordToForm,
+          openCreateModal,
+          openEditModal,
+          saveItem,
+          openSettings,
+          saveSecurityConfig,
+          updateMasterPassword,
+          sendTestSmtpEmail,
+          createManualSnapshot,
+          exportVaultBackup,
+          copyText,
+          showToast
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

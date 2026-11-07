@@ -1,0 +1,771 @@
+{
+  "audit_id": "BPW-SEC-20261107",
+  "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d",
+  "rule": "适用性/覆盖/测试状态独立；未执行/不适用不计通过；C28只标识查询执行有效",
+  "checks": [
+    {
+      "id": "C01",
+      "domains": [
+        "G01",
+        "G06"
+      ],
+      "entry": "GET /vault,/settings,/settings/mail,/audit,/backup/list,/auth/me",
+      "role": "匿名",
+      "resource": "金库/配置/审计",
+      "input": "无Authorization",
+      "condition": "无会话",
+      "existing_defense": "get_current_user",
+      "method": "隔离真实HTTP",
+      "expected": "全部401",
+      "actual": "6个入口全部401",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T01",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C02",
+      "domains": [
+        "G02"
+      ],
+      "entry": "POST /auth/register",
+      "role": "匿名→两个独立账号",
+      "resource": "账号/共享服务",
+      "input": "两个合成邮箱/随机认证材料",
+      "condition": "无生产凭据",
+      "existing_defense": "3/hour路由限流、邮箱唯一",
+      "method": "隔离真实HTTP，业务测试关闭限流",
+      "expected": "按个人部署政策限制注册；明确第二账号权限",
+      "actual": "两次201；没有首账号禁注册/管理员角色",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "T02 / auth_service.py:209-239",
+      "findings": [
+        "F-06",
+        "F-07"
+      ],
+      "limitations": "第二账号可注册是观察，不单独判为越权；单用户策略验收未确定",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C03",
+      "domains": [
+        "G06"
+      ],
+      "entry": "GET /vault; PATCH/DELETE items/folders",
+      "role": "Bob→Alice",
+      "resource": "Alice条目/文件夹",
+      "input": "已知合成资源ID",
+      "condition": "Bob合法会话",
+      "existing_defense": "user_id所有权检查",
+      "method": "隔离真实HTTP",
+      "expected": "Bob列表为空、修改删除404",
+      "actual": "Bob列表为空，四次跨用户修改/删除404",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T03",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C04",
+      "domains": [
+        "G02",
+        "G15"
+      ],
+      "entry": "POST /auth/prelogin",
+      "role": "匿名",
+      "resource": "账号存在性",
+      "input": "存在/不存在邮箱各两次",
+      "condition": "无会话",
+      "existing_defense": "随机假salt、20/minute",
+      "method": "隔离真实HTTP",
+      "expected": "存在性不可由响应稳定性区分",
+      "actual": "已知salt稳定，未知salt变化",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T04",
+      "findings": [
+        "F-08"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C05",
+      "domains": [
+        "G03",
+        "G14"
+      ],
+      "entry": "forgot→verify→reset→login",
+      "role": "取得邮箱码者",
+      "resource": "账号认证/包装DEK",
+      "input": "只有邮箱码+新认证材料",
+      "condition": "目标无2FA",
+      "existing_defense": "邮箱码有效期/次数、JWT类型",
+      "method": "隔离真实HTTP；邮件替换为本地内存收集",
+      "expected": "无恢复证明拒绝",
+      "actual": "无恢复码reset200，新认证login200；旧明文未解密",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T05",
+      "findings": [
+        "F-01"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C06",
+      "domains": [
+        "G03",
+        "G05"
+      ],
+      "entry": "重复POST /auth/reset",
+      "role": "持有效resetToken者",
+      "resource": "新认证/包装",
+      "input": "同一reset JWT",
+      "condition": "首次已消费",
+      "existing_defense": "签名/exp/type，缺消费状态",
+      "method": "隔离真实HTTP",
+      "expected": "第二次拒绝",
+      "actual": "第二次200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T06",
+      "findings": [
+        "F-02"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C07",
+      "domains": [
+        "G05"
+      ],
+      "entry": "reset后旧access与refresh",
+      "role": "持旧会话者",
+      "resource": "认证撤销",
+      "input": "旧access/旧refresh",
+      "condition": "重置成功",
+      "existing_defense": "refresh全量撤销；access无状态",
+      "method": "隔离真实HTTP",
+      "expected": "refresh拒绝；access窗口需明确",
+      "actual": "refresh401；access200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T06",
+      "findings": [],
+      "limitations": "仅refresh撤销通过；access保留15分钟作为加固记录",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C08",
+      "domains": [
+        "G04",
+        "G05"
+      ],
+      "entry": "重复POST /auth/2fa/verify",
+      "role": "持challenge+TOTP者",
+      "resource": "二步登录",
+      "input": "同challenge同当前码",
+      "condition": "两步登录第一因子已完成",
+      "existing_defense": "challenge5分钟、TOTP相邻窗口",
+      "method": "隔离真实HTTP",
+      "expected": "首次成功、第二次拒绝",
+      "actual": "两次200，access不同",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T07",
+      "findings": [
+        "F-02"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C09",
+      "domains": [
+        "G04",
+        "G18"
+      ],
+      "entry": "错误TOTP后正确验证",
+      "role": "持challenge者",
+      "resource": "challenge失败次数",
+      "input": "6次合成错误再正确码",
+      "condition": "路由限流关闭以隔离内部计数",
+      "existing_defense": "单IP路由限流；无challenge计数",
+      "method": "隔离真实HTTP+静态链",
+      "expected": "5次失败后challenge作废",
+      "actual": "6次401后正确码仍200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T08",
+      "findings": [
+        "F-02"
+      ],
+      "limitations": "不构成已启用限流绕过/爆破成功证据",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C10",
+      "domains": [
+        "G04",
+        "G06"
+      ],
+      "entry": "2fa/enable vs recovery-codes/regenerate",
+      "role": "有效会话+TOTP持有者",
+      "resource": "备用码集合",
+      "input": "重复enable、不提供主密码",
+      "condition": "已经启用2FA",
+      "existing_defense": "setup和regenerate有更强检查",
+      "method": "隔离真实HTTP",
+      "expected": "重复enable拒绝且旧集合不变",
+      "actual": "enable200、旧码失效；错密码regenerate401",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T09",
+      "findings": [
+        "F-14"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C11",
+      "domains": [
+        "G04",
+        "G12"
+      ],
+      "entry": "并发2fa/verify-recovery",
+      "role": "持challenge+备用码者",
+      "resource": "单次备用码",
+      "input": "固定同一码两请求",
+      "condition": "合法未消费码",
+      "existing_defense": "used_at字段，先读再写",
+      "method": "隔离真实HTTP，两请求",
+      "expected": "恰好一次成功",
+      "actual": "200/200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T10",
+      "findings": [
+        "F-03"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C12",
+      "domains": [
+        "G05",
+        "G12"
+      ],
+      "entry": "并发auth/refresh",
+      "role": "持refresh者",
+      "resource": "refresh轮换",
+      "input": "两请求显式固定同一Cookie",
+      "condition": "合法未撤销refresh",
+      "existing_defense": "token哈希、撤销字段，先读再写",
+      "method": "隔离真实HTTP，两请求",
+      "expected": "恰好一次成功",
+      "actual": "200/200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T11",
+      "findings": [
+        "F-03"
+      ],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C13",
+      "domains": [
+        "G17",
+        "G19"
+      ],
+      "entry": "带XFF的auth/login→audit",
+      "role": "合法账号",
+      "resource": "审计客户端IP",
+      "input": "自选X-Forwarded-For",
+      "condition": "uvicorn proxy_headers=False",
+      "existing_defense": "无应用级trusted proxy验证",
+      "method": "隔离真实HTTP",
+      "expected": "忽略非可信对端转发头",
+      "actual": "审计含自选IP",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T12",
+      "findings": [
+        "F-09"
+      ],
+      "limitations": "不据此推断slowapi remote address被绕过",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C14",
+      "domains": [
+        "G06",
+        "G09",
+        "G14"
+      ],
+      "entry": "POST /backup/snapshot",
+      "role": "第二普通账号",
+      "resource": "全库快照",
+      "input": "合法普通会话",
+      "condition": "合成2用户库",
+      "existing_defense": "仅get_current_user；无admin",
+      "method": "隔离HTTP+临时SQLite读回",
+      "expected": "共享运维快照需受限授权",
+      "actual": "200，快照含两个用户/认证与TOTP列",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T13",
+      "findings": [
+        "F-06"
+      ],
+      "limitations": "无下载路由，未证明远程取全库文件",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C15",
+      "domains": [
+        "G15",
+        "G17"
+      ],
+      "entry": "Settings生产配置及JWT认证",
+      "role": "知道默认秘密和合成UUID者",
+      "resource": "API认证",
+      "input": "默认JWT值/production Settings",
+      "condition": "隔离实例临时替换jwt_secret",
+      "existing_defense": "JWT签名/type/exp/用户存在",
+      "method": "隔离合成配置+HTTP",
+      "expected": "生产拒绝已知开发默认值",
+      "actual": "production Settings接受默认值，合成已知用户JWT200",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T14",
+      "findings": [
+        "F-04"
+      ],
+      "limitations": "未读取真实密钥，未启动完整production部署",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C16",
+      "domains": [
+        "G05"
+      ],
+      "entry": "GET /vault",
+      "role": "持错类型/过期JWT者",
+      "resource": "API认证",
+      "input": "合成reset类型/过期access",
+      "condition": "正确合成签名",
+      "existing_defense": "type/exp验证",
+      "method": "隔离真实HTTP",
+      "expected": "401",
+      "actual": "两次401",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T15",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C17",
+      "domains": [
+        "G02",
+        "G18"
+      ],
+      "entry": "POST /auth/login",
+      "role": "匿名",
+      "resource": "认证计算资源",
+      "input": "6次合成错误认证",
+      "condition": "限流重新开启、相同peer",
+      "existing_defense": "slowapi 5/minute",
+      "method": "隔离真实HTTP",
+      "expected": "前5次401、第6次429",
+      "actual": "401,401,401,401,401,429",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T16",
+      "findings": [],
+      "limitations": "单进程、单IP场景；未核验workers2共享计数",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C18",
+      "domains": [
+        "G08",
+        "G17"
+      ],
+      "entry": "OPTIONS /vault",
+      "role": "非信任Origin",
+      "resource": "跨域边界",
+      "input": "untrusted.invalid Origin",
+      "condition": "CORS中间件",
+      "existing_defense": "allowed_origins显式列表",
+      "method": "隔离真实HTTP",
+      "expected": "拒绝",
+      "actual": "400",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T17",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C19",
+      "domains": [
+        "G08",
+        "G14"
+      ],
+      "entry": "GET /vault",
+      "role": "合法用户",
+      "resource": "API缓存",
+      "input": "正常请求",
+      "condition": "认证成功",
+      "existing_defense": "无no-store中间件",
+      "method": "隔离真实HTTP",
+      "expected": "no-store",
+      "actual": "header缺失",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T17",
+      "findings": [
+        "F-13"
+      ],
+      "limitations": "加固项，未复现缓存泄露",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C20",
+      "domains": [
+        "G10",
+        "G13",
+        "G15"
+      ],
+      "entry": "register→PUT mail→POST mail/test",
+      "role": "新注册普通账号",
+      "resource": "部署全局SMTP密码",
+      "input": "自选host/port/user、无password",
+      "condition": "合成全局SMTP_PASS，限流开启",
+      "existing_defense": "按用户存储加密，但逐字段全局回退",
+      "method": "隔离真实HTTP+本地SMTP协议接收器",
+      "expected": "用户端点不取得全局密码",
+      "actual": "201/200/200；本地接收器收到合成全局密码",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T18",
+      "findings": [
+        "F-07"
+      ],
+      "limitations": "未测试真实TLS/邮箱；外网不可达；若全局密码为空该链不成立",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C21",
+      "domains": [
+        "G09",
+        "G14",
+        "G19"
+      ],
+      "entry": "create_snapshot+cleanup",
+      "role": "服务账号",
+      "resource": "快照权限/保留",
+      "input": "umask022、40天pre-import合成文件",
+      "condition": "临时合成库/目录",
+      "existing_defense": "自动保留但kind解析错误",
+      "method": "隔离真实函数与临时文件",
+      "expected": "受限权限、旧pre-import清理",
+      "actual": "创建0644、旧pre-import保留",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T19",
+      "findings": [
+        "F-05",
+        "F-12"
+      ],
+      "limitations": "pre-import当前HTTP导入入口未生成，函数缺陷可复现",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C22",
+      "domains": [
+        "G19"
+      ],
+      "entry": "SQLite快照integrity_check",
+      "role": "审计合成接收者",
+      "resource": "合成快照结构",
+      "input": "临时快照",
+      "condition": "无真实数据",
+      "existing_defense": "sqlite3 backup",
+      "method": "隔离临时SQLite检查",
+      "expected": "ok",
+      "actual": "ok、1合成用户",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T20",
+      "findings": [],
+      "limitations": "只证明结构，不等于端到端恢复演练",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C23",
+      "domains": [
+        "G07",
+        "G13"
+      ],
+      "entry": "EmailMessage subject",
+      "role": "用户自定义header内容",
+      "resource": "邮件头",
+      "input": "换行",
+      "condition": "合成数据直接调用",
+      "existing_defense": "EmailMessage拒绝换行",
+      "method": "隔离直接函数探测",
+      "expected": "无额外header被发送",
+      "actual": "ValueError拒绝、无邮件",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "T21",
+      "findings": [],
+      "limitations": "模板API误用POST405，API覆盖不成立；try外ValueError另列可用性加固",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C24",
+      "domains": [
+        "G08",
+        "G14"
+      ],
+      "entry": "编辑→lockVault",
+      "role": "解锁会话本地操作者",
+      "resource": "表单明文",
+      "input": "合成条目编辑后锁定",
+      "condition": "真实Vue store、图片stub",
+      "existing_defense": "主DEK/列表清空，表单无清理",
+      "method": "隔离Node模块状态验证",
+      "expected": "表单/弹窗一并清理",
+      "actual": "主DEK/list清空；表单密码和编辑状态仍保留",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "T22",
+      "findings": [
+        "F-10"
+      ],
+      "limitations": "不是浏览器DOM/遮罩绕过或任意站点脚本执行证明",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C25",
+      "domains": [
+        "G15"
+      ],
+      "entry": "文件权限检查",
+      "role": "本机UID65534",
+      "resource": "当前真实db/backup路径权限",
+      "input": "test -r；不打开文件",
+      "condition": "父目录可遍历",
+      "existing_defense": "Unix权限",
+      "method": "只读权限元信息",
+      "expected": "不应允许其他UID读",
+      "actual": "两路径test-r为true",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "失败",
+      "evidence": "report F-05",
+      "findings": [
+        "F-05"
+      ],
+      "limitations": "没有读取真实库内容/验证真实账号",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C26",
+      "domains": [
+        "G07"
+      ],
+      "entry": "35个backend/app Python文件",
+      "role": "外部输入→服务端",
+      "resource": "危险执行点",
+      "input": "AST调用名称",
+      "condition": "仅解析不导入",
+      "existing_defense": "Pydantic和ORM",
+      "method": "审计脚本静态AST/人工数据流",
+      "expected": "无可达不安全执行链",
+      "actual": "列出的危险函数名无命中；ORM路径绑定参数",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "static-scan.json",
+      "findings": [],
+      "limitations": "有限sink清单，不等于通用SAST无漏洞",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C27",
+      "domains": [
+        "G15"
+      ],
+      "entry": "当前源/选定历史路径",
+      "role": "仓库读取者",
+      "resource": "潜在历史秘密",
+      "input": "25个提交的文本补丁",
+      "condition": "不展开归档或真实.env/db",
+      "existing_defense": "gitignore；无凭据试用",
+      "method": "离线正则/上下文核查",
+      "expected": "识别来源且不输出真实值",
+      "actual": "测试夹具/placeholder排除；catalog来源保留待验证",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "static-scan.json",
+      "findings": [
+        "F-11"
+      ],
+      "limitations": "模式扫描已执行；真实值来源/有效性未执行，不计秘密安全通过",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C28",
+      "domains": [
+        "G16"
+      ],
+      "entry": "锁文件/已安装分发元信息",
+      "role": "构建/运行依赖",
+      "resource": "公开包版本",
+      "input": "264去重公共身份/版本",
+      "condition": "无私有身份发送；未安装工具",
+      "existing_defense": "npm lock integrity；后端无锁文件",
+      "method": "OSV querybatch HTTP200",
+      "expected": "返回有效匹配结果；缺口保留",
+      "actual": "零匹配，无分页",
+      "applicability": "适用",
+      "coverage": "已检查",
+      "test_status": "通过",
+      "evidence": "osv-querybatch.json",
+      "findings": [],
+      "limitations": "仅数据库匹配通过；真实性/恶意包/未锁定未来安装不覆盖",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C29",
+      "domains": [
+        "G17"
+      ],
+      "entry": "真实生产Nginx/TLS",
+      "role": "生产远端用户",
+      "resource": "真实部署",
+      "input": "无请求",
+      "condition": "无生产地址与生产核验授权",
+      "existing_defense": "只有部署示例",
+      "method": "未执行",
+      "expected": "真实检查才能判断",
+      "actual": "未执行，仅静态读文档",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "docs/DEPLOYMENT.md",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C30",
+      "domains": [
+        "G08"
+      ],
+      "entry": "浏览器DOM/剪贴板/锁定交互",
+      "role": "浏览器用户",
+      "resource": "页面和系统剪贴板",
+      "input": "未发浏览器操作",
+      "condition": "隔离资源模块测试不能替代浏览器",
+      "existing_defense": "DOMPurify/模板转义",
+      "method": "未执行",
+      "expected": "独立浏览器验证",
+      "actual": "未执行",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "report limitations",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C31",
+      "domains": [
+        "G18"
+      ],
+      "entry": "资源上限/并发负载",
+      "role": "外部或已认证用户",
+      "resource": "CPU/内存/磁盘",
+      "input": "无压力流量",
+      "condition": "仅两请求竞态",
+      "existing_defense": "Nginx示例4MiB，模型单项上限",
+      "method": "未执行压力测试",
+      "expected": "受限测试确认上限",
+      "actual": "未执行",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "report limitations",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    },
+    {
+      "id": "C32",
+      "domains": [
+        "G19"
+      ],
+      "entry": "真实备份恢复",
+      "role": "运维账号",
+      "resource": "历史真实条目可解密性",
+      "input": "不读取/覆盖真实库",
+      "condition": "只做合成integrity_check",
+      "existing_defense": "客户端密文、文档age脚本",
+      "method": "未执行恢复演练",
+      "expected": "端到端恢复后仍可解密",
+      "actual": "未执行",
+      "applicability": "适用",
+      "coverage": "待检查",
+      "test_status": "未执行",
+      "evidence": "report limitations",
+      "findings": [],
+      "limitations": "Only stated scenario; production not tested",
+      "baseline": "77eaf0fae68694d0eb360d7a6a3a8abbfe25590d"
+    }
+  ]
+}

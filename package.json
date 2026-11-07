@@ -1,0 +1,9 @@
+{
+  "name": "bypassword-dev",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:api": "cd backend && .venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:all": "bash scripts/dev-all.sh"
+  }
+}
